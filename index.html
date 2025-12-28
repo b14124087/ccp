@@ -8,12 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
+    <!-- 引入 Canvas Confetti (煙火特效用) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
         :root {
-            --bg-dark: #11111b; /* 更深邃的背景色 */
+            --bg-dark: #11111b; 
             --accent-color: #f7d51d;
             --ui-blue: #3b5dc9;
+            --boss-red: #ff3333;
         }
 
         body {
@@ -21,47 +24,52 @@
             font-family: 'DotGothic16', sans-serif; 
             color: #333;
             overflow-x: hidden;
-            /* 自定義游標 */
-            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1282.cur'), crosshair; 
+            cursor: url('https://cur.cursors-4u.net/cursors/cur-10/cur964.cur'), auto;
         }
 
-        /* --- 全站通用的動態像素背景 (修改為左右移動) --- */
+        /* 讓所有可互動元素的游標也變成劍 */
+        a, button, .company-grid-item, .close-btn, .gacha-folder, .pixel-btn, .boss-grid-item {
+            cursor: url('https://cur.cursors-4u.net/cursors/cur-10/cur964.cur'), pointer; 
+        }
+
+        /* --- 全站通用的動態像素背景 --- */
         #global-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1; /* 放在最底層 */
+            z-index: -1; 
             background-color: var(--bg-dark);
-            
-            /* 請在此處替換為您上傳的背景圖片路徑，例如 url('./images/bg.jpg') */
-            background-image: url('./image/background.png');
-            
-            /* 關鍵：放大背景圖以便左右移動 (110% 代表比螢幕寬一點) */
+            background-image: url('./image/background.png'); 
             background-size: 110% 110%; 
             background-position: center;
-            
-            /* 強制像素化放大，保留顆粒感 */
             image-rendering: pixelated; 
-            
-            /* 加入左右移動動畫：20秒來回一次 */
             animation: bg-pan 20s ease-in-out infinite alternate;
+            transition: background-image 0.5s ease-in-out, filter 0.2s ease;
         }
 
-        /* 疊加一層動態掃描線 (CRT Scanline) - 讓畫面更有復古感 */
+        /* BOSS 模式背景 */
+        #global-bg.boss-mode {
+            background-image: url('./image/boss.png'); 
+            filter: contrast(1.1) brightness(0.8);
+        }
+
+        /* 受傷閃爍背景 */
+        #global-bg.damage-mode {
+            filter: sepia(1) hue-rotate(-50deg) saturate(5) contrast(2);
+        }
+
         #global-bg::after {
             content: "";
             position: absolute;
             inset: 0;
-            /* 橫條紋漸層 */
             background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 51%);
-            background-size: 100% 4px; /* 每一條掃描線的高度 */
+            background-size: 100% 4px;
             animation: scanline-move 60s linear infinite;
-            pointer-events: none; /* 讓滑鼠可以穿透 */
+            pointer-events: none;
         }
 
-        /* 疊加暗角 (Vignette) 讓視覺集中 */
         #global-bg::before {
             content: "";
             position: absolute;
@@ -71,31 +79,12 @@
             pointer-events: none;
         }
 
-        /* 背景左右移動動畫關鍵影格 */
-        @keyframes bg-pan {
-            0% { 
-                background-position: 0% 50%; /* 靠左 */
-            }
-            100% { 
-                background-position: 100% 50%; /* 靠右 */
-            }
-        }
-
-        /* 掃描線移動動畫 */
-        @keyframes scanline-move {
-            0% { background-position: 0 0; }
-            100% { background-position: 0 1000px; }
-        }
-
-        /* 互動元素游標 */
-        a, button, .company-grid-item, .close-btn {
-            cursor: url('https://cur.cursors-4u.net/games/gam-13/gam1289.cur'), pointer; 
-        }
+        @keyframes bg-pan { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        @keyframes scanline-move { 0% { background-position: 0 0; } 100% { background-position: 0 1000px; } }
 
         .en-pixel { font-family: 'Press Start 2P', cursive; }
         h1, h2, h3, .pixel-font { font-family: 'DotGothic16', sans-serif; line-height: 1.5; }
 
-        /* 像素邊框 */
         .pixel-box {
             background: white;
             border: 4px solid black;
@@ -103,12 +92,8 @@
             box-shadow: 4px 4px 0px 0px rgba(0,0,0,1); 
         }
 
-        /* 強制像素化 */
-        .force-pixel {
-            image-rendering: pixelated;
-        }
+        .force-pixel { image-rendering: pixelated; }
 
-        /* RPG 對話框 */
         .rpg-dialogue {
             background-color: var(--ui-blue);
             color: white;
@@ -128,7 +113,6 @@
             box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.2), 4px 4px 0px 0px #000;
             transition: transform 0.1s, box-shadow 0.1s;
         }
-
         .pixel-btn:active { transform: translate(4px, 4px); box-shadow: none; }
         .pixel-btn:hover { background-color: #ffe066; }
 
@@ -138,7 +122,6 @@
             transition: all 0.1s;
             position: relative;
         }
-        
         .company-grid-item:hover {
             border-color: var(--accent-color);
             transform: scale(1.05);
@@ -158,7 +141,7 @@
             animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* 呼吸動畫 (用於物件) */
+        /* 呼吸動畫 */
         @keyframes breathe-obj {
             0% { transform: scale(1); }
             50% { transform: scale(1.03); }
@@ -180,44 +163,90 @@
             animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
         }
 
-        /* 數值條動畫 */
-        .stat-bar-fill {
-            width: 0%;
-            transition: width 1s ease-out;
-        }
-
-        /* 閃爍游標 */
-        .cursor-blink {
-            animation: blink 1s infinite;
-        }
+        .stat-bar-fill { width: 0%; transition: width 1s ease-out; }
+        .cursor-blink { animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
         /* Loading Screen */
         #loading-screen {
-            position: fixed;
-            inset: 0;
-            background-color: #000;
-            z-index: 9999;
-            display: flex;
-            flex-col: column;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Press Start 2P', cursive;
-            color: white;
+            position: fixed; inset: 0; background-color: #000; z-index: 9999;
+            display: flex; flex-col: column; align-items: center; justify-content: center;
+            font-family: 'Press Start 2P', cursive; color: white;
         }
-        .loading-bar-container {
-            width: 80%;
-            max-width: 300px;
-            height: 20px;
-            border: 2px solid white;
-            padding: 2px;
-            margin-top: 20px;
+        .loading-bar-container { width: 80%; max-width: 400px; height: 30px; border: 4px solid white; padding: 4px; margin-top: 20px; }
+        .loading-bar-fill { height: 100%; background-color: var(--accent-color); width: 0%; transition: width 0.1s linear; }
+
+        /* --- 抽卡系統樣式 --- */
+        #gacha-screen {
+            position: fixed; inset: 0; z-index: 60;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
         }
-        .loading-bar-fill {
-            height: 100%;
-            background-color: var(--accent-color);
-            width: 0%;
-            transition: width 0.1s linear;
+
+        .gacha-folder {
+            width: 160px; height: 120px; background-color: #fb923c; border: 8px solid #000;
+            position: relative; box-shadow: 10px 10px 0 #000; cursor: pointer;
+        }
+        .gacha-folder::before {
+            content: ''; position: absolute; top: -20px; left: -8px; width: 60px; height: 20px;
+            background-color: #fb923c; border: 8px solid #000; border-bottom: none;
+        }
+        .gacha-folder::after {
+            content: 'SECRET'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-family: 'Press Start 2P'; font-size: 12px; color: black; background: rgba(255,255,255,0.8);
+            padding: 4px; border: 2px solid black; text-align: center;
+        }
+        
+        .gacha-idle { animation: float-folder 3s ease-in-out infinite; }
+        @keyframes float-folder { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+
+        .gacha-shake { animation: shake-hard 0.5s linear infinite; }
+        @keyframes shake-hard {
+            0% { transform: translate(2px, 2px) rotate(0deg); }
+            25% { transform: translate(-2px, -2px) rotate(-5deg); }
+            50% { transform: translate(2px, -2px) rotate(5deg); }
+            75% { transform: translate(-2px, 2px) rotate(-5deg); }
+            100% { transform: translate(2px, -2px) rotate(0deg); }
+        }
+
+        .gacha-flash { animation: flash-white 0.5s forwards; }
+        @keyframes flash-white {
+            0% { background-color: rgba(0,0,0,0.85); }
+            50% { background-color: white; }
+            100% { background-color: rgba(0,0,0,0.85); opacity: 0; }
+        }
+
+        /* --- 發光展示 (Shiny Reveal) --- */
+        #gacha-reveal {
+            position: fixed; inset: 0; z-index: 55;
+            display: flex; align-items: center; justify-content: center;
+            pointer-events: none;
+        }
+        
+        .sunburst {
+            position: absolute; width: 200vmax; height: 200vmax;
+            background: repeating-conic-gradient(from 0deg, #f7d51d 0deg 20deg, #ffed4a 20deg 40deg);
+            animation: spin 10s linear infinite;
+            opacity: 0; transition: opacity 0.5s;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 修正：教練抽卡尺寸自適應 2:3 */
+        .reveal-img-container {
+            width: 70vw; /* 手機版寬度 */
+            max-width: 400px; /* 最大寬度 */
+            aspect-ratio: 2/3; /* 強制 2:3 比例 */
+            height: auto; /* 高度自動 */
+            z-index: 10;
+            transform: scale(0); opacity: 0;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 8px solid white; box-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
+            background: white; 
+        }
+
+        .auto-remove-bg {
+            mix-blend-mode: multiply; 
+            filter: contrast(1.1) brightness(1.05);
         }
 
         img { image-rendering: auto; }
@@ -226,6 +255,131 @@
         ::-webkit-scrollbar { width: 12px; }
         ::-webkit-scrollbar-track { background: #202028; }
         ::-webkit-scrollbar-thumb { background: #f7d51d; border: 2px solid #000; }
+
+        /* --- BOSS Stage 專用樣式 --- */
+        #boss-stage {
+            border-top: 8px solid #000;
+            background-color: rgba(0, 0, 0, 0.6); 
+            position: relative;
+            min-height: 80vh; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        /* 6x4 Grid System */
+        .boss-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 8px;
+        }
+        @media (min-width: 768px) {
+            .boss-grid {
+                grid-template-columns: repeat(6, 1fr); 
+                gap: 16px;
+            }
+        }
+
+        .boss-grid-item {
+            aspect-ratio: 1;
+            background-color: #333;
+            border: 4px solid #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s;
+        }
+        .boss-grid-item:hover {
+            transform: scale(1.05);
+            border-color: var(--boss-red);
+            z-index: 5;
+        }
+        .boss-grid-item.cleared {
+            background-color: #222;
+            border-color: #000;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .boss-grid-item.cleared::after {
+            content: "❌";
+            font-size: 48px;
+            position: absolute;
+            color: var(--boss-red);
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* Boss HP Bar */
+        .boss-hp-container {
+            width: 100%;
+            height: 40px;
+            background: #333;
+            border: 4px solid white;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .boss-hp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6600);
+            width: 100%;
+            transition: width 0.3s ease-out;
+            position: relative;
+        }
+        .boss-hp-fill::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
+            background-size: 20px 20px;
+        }
+
+        /* Question Modal */
+        #question-modal {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+        }
+        .question-box {
+            background: var(--ui-blue);
+            border: 6px solid white;
+            outline: 6px solid black;
+            padding: 24px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 10px 10px 0 0 rgba(0,0,0,0.5);
+            text-align: center;
+            color: white;
+        }
+
+        /* Text Glitch Effect for Shuffle */
+        @keyframes text-glitch {
+            0% { transform: translate(0, 0); opacity: 1; }
+            20% { transform: translate(-2px, 2px); opacity: 0.8; }
+            40% { transform: translate(2px, -2px); opacity: 0.9; }
+            60% { transform: translate(-1px, 1px); opacity: 0.8; }
+            80% { transform: translate(1px, -1px); opacity: 1; }
+            100% { transform: translate(0, 0); opacity: 1; }
+        }
+        .shuffling {
+            animation: text-glitch 0.1s infinite;
+            color: #ffff00; /* Yellow while shuffling */
+        }
+
+        /* Victory Screen */
+        #victory-screen {
+            background: linear-gradient(to bottom, #000046, #1cb5e0);
+            z-index: 1000;
+        }
+        .victory-text {
+            font-family: 'Press Start 2P', cursive;
+            color: #f7d51d;
+            text-shadow: 4px 4px 0 #000;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+
     </style>
 </head>
 <body class="min-h-screen text-gray-900 selection:bg-yellow-400 selection:text-black">
@@ -235,165 +389,224 @@
 
     <!-- 0. Loading Screen -->
     <section id="loading-screen">
-        <h2 class="text-xl md:text-2xl mb-4 animate-pulse en-pixel text-center">LOADING...</h2>
+        <h2 class="text-3xl md:text-5xl mb-6 animate-pulse en-pixel text-center">LOADING...</h2>
         <div class="loading-bar-container">
             <div id="loading-fill" class="loading-bar-fill"></div>
         </div>
-        <p id="loading-text" class="text-[10px] md:text-xs mt-2 text-gray-400 en-pixel">INITIALIZING WORLD...</p>
+        <p id="loading-text" class="text-sm md:text-xl mt-4 text-gray-400 en-pixel">INITIALIZING WORLD...</p>
     </section>
 
     <!-- 1. Start Screen -->
     <section id="start-screen" class="hidden-screen flex flex-col items-center justify-center h-screen text-center relative">
-        <div class="z-10 bg-black bg-opacity-80 p-6 md:p-8 border-4 border-white shadow-[8px_8px_0_0_rgba(0,0,0,0.5)] max-w-[90%] md:max-w-2xl mx-4">
-            <h1 class="text-2xl md:text-5xl text-yellow-400 mb-6 tracking-widest leading-relaxed pixel-font">
+        <div class="z-10 bg-black bg-opacity-80 p-10 md:p-16 border-8 border-white shadow-[8px_8px_0_0_rgba(0,0,0,0.5)] max-w-[90%] md:max-w-5xl mx-4">
+            <h1 class="text-4xl md:text-7xl text-yellow-400 mb-8 tracking-widest leading-relaxed pixel-font">
                 第16屆<br>職涯教練計畫
             </h1>
-            <div class="h-1 bg-white w-full mb-6"></div>
-            <p class="text-white pixel-font text-sm md:text-xl mb-8 blink">PRESS START TO ADVENTURE</p>
-            <button onclick="startGame()" class="pixel-btn text-base md:text-2xl w-full trigger-sound">START GAME</button>
+            <div class="h-2 bg-white w-full mb-8"></div>
+            <p class="text-white pixel-font text-xl md:text-3xl mb-12 blink">PRESS START TO ADVENTURE</p>
+            <button onclick="startGame()" class="pixel-btn text-2xl md:text-4xl w-full trigger-sound">START GAME</button>
         </div>
-        <div class="absolute bottom-4 text-white text-[10px] md:text-xs en-pixel z-10 flex gap-4 items-center">
+        <div class="absolute bottom-8 text-white text-base md:text-xl en-pixel z-10 flex gap-4 items-center">
             <span>© 16th Career Coach Team.</span>
         </div>
     </section>
 
     <!-- BGM 控制按鈕 -->
-    <div class="fixed bottom-4 left-4 z-50 hidden" id="bgm-control">
-        <button onclick="toggleBGM()" class="bg-gray-900 text-white border-2 border-white px-3 py-1 text-xs en-pixel hover:bg-gray-700 shadow-md flex items-center gap-2 trigger-sound">
+    <div class="fixed bottom-4 left-4 z-50 hidden flex flex-col gap-2" id="bgm-control">
+        <button onclick="toggleFullScreen()" class="bg-gray-900 text-white border-2 border-white px-4 py-2 text-sm md:text-base en-pixel hover:bg-gray-700 shadow-md flex items-center gap-2 trigger-sound">
+            <span>⛶</span> FULLSCREEN
+        </button>
+        <button onclick="toggleBGM()" class="bg-gray-900 text-white border-2 border-white px-4 py-2 text-sm md:text-base en-pixel hover:bg-gray-700 shadow-md flex items-center gap-2 trigger-sound">
             <span>🎵</span> <span id="bgm-status">BGM: OFF</span>
         </button>
     </div>
 
     <!-- 2. Main Map -->
     <section id="main-map" class="hidden-screen min-h-screen p-4 md:p-8 relative z-10">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-gray-900 border-4 border-white p-4 sticky top-4 z-50 shadow-[4px_4px_0_0_#000]">
-            <div class="flex items-center gap-4 mb-2 md:mb-0">
-                <div class="w-10 h-10 md:w-12 md:h-12 bg-yellow-400 border-4 border-black flex items-center justify-center font-bold text-lg md:text-xl en-pixel">16</div>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-8 bg-gray-900 border-4 border-white p-6 sticky top-4 z-40 shadow-[6px_6px_0_0_#000]">
+            <div class="flex items-center gap-6 mb-4 md:mb-0">
+                <div class="w-16 h-16 bg-yellow-400 border-4 border-black flex items-center justify-center font-bold text-2xl en-pixel">16</div>
                 <div>
-                    <h2 class="text-white text-lg md:text-2xl pixel-font tracking-widest">企業冒險地圖</h2>
-                    <div class="h-2 bg-green-500 w-full border border-white mt-1 relative overflow-hidden">
+                    <h2 class="text-white text-2xl md:text-4xl pixel-font tracking-widest">企業冒險地圖</h2>
+                    <div class="h-3 bg-green-500 w-full border-2 border-white mt-2 relative overflow-hidden">
                         <div class="absolute top-0 left-0 h-full bg-green-300 w-3/4 animate-pulse"></div>
                     </div>
                 </div>
             </div>
-            <div class="rpg-dialogue text-[10px] md:text-sm en-pixel w-full md:w-auto text-center md:text-left">
-                <span class="text-yellow-300">SYSTEM:</span> Please select a guild.
+            <div class="rpg-dialogue text-base md:text-xl en-pixel w-full md:w-auto text-center md:text-left">
+                <span class="text-yellow-300">SYSTEM:</span> Click a card to summon mentor.
             </div>
         </header>
 
-        <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 md:gap-4 pb-12">
+        <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-24">
             <!-- Grid Content -->
+        </div>
+
+        <!-- 4. BOSS Stage -->
+        <section id="boss-stage" class="p-6 md:p-12 mt-12 border-4 border-white shadow-[0_0_20px_rgba(255,0,0,0.5)] transition-all duration-1000 opacity-50 grayscale">
+            <div class="flex flex-col items-center mb-8">
+                <h2 class="text-red-500 text-4xl md:text-6xl en-pixel mb-4 animate-pulse" style="text-shadow: 4px 4px 0 #000;">BOSS BATTLE</h2>
+                <div class="w-full max-w-4xl relative">
+                    <div class="flex justify-between text-white en-pixel mb-2 font-bold text-lg">
+                        <span>BOSS HP</span>
+                        <span id="boss-hp-text">24/24</span>
+                    </div>
+                    <div class="boss-hp-container">
+                        <div id="boss-hp-bar" class="boss-hp-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6x4 Grid System for Boss -->
+            <div class="max-w-4xl mx-auto w-full">
+                <div id="boss-grid" class="boss-grid">
+                    <!-- Boss Grid Items Generated by JS -->
+                </div>
+            </div>
+            
+            <div class="text-center mt-8 text-white pixel-font text-xl bg-black/50 p-2 rounded">
+                <p>點擊格子進行問題抽選，挑戰成功即可對 BOSS 造成傷害！</p>
+            </div>
+        </section>
+
+    </section>
+
+    <!-- Question Modal (Updated with Shuffle Effect) -->
+    <div id="question-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
+        <div class="question-box pop-in-animation">
+            <h3 class="text-2xl md:text-3xl text-yellow-300 mb-6 pixel-font">MISSION</h3>
+            <div class="min-h-[100px] flex items-center justify-center">
+                <p id="q-text" class="text-xl md:text-2xl leading-relaxed mb-8 pixel-font text-left w-full break-words">...</p>
+            </div>
+            <div class="flex flex-col gap-4">
+                <button id="attack-btn" onclick="submitAttack()" class="pixel-btn w-full text-xl md:text-2xl trigger-sound bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                    ⚔️ ATTACK
+                </button>
+            </div>
+            <button onclick="closeQuestionModal()" class="mt-6 text-sm underline text-gray-300 hover:text-white">暫時撤退 (CLOSE)</button>
+        </div>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victory-screen" class="fixed inset-0 hidden flex flex-col items-center justify-center text-center">
+        <h1 class="victory-text text-5xl md:text-8xl mb-8">VICTORY!</h1>
+        <p class="text-white text-2xl md:text-4xl pixel-font mb-12">恭喜通關！職涯冒險成功！</p>
+        <button onclick="location.reload()" class="pixel-btn text-2xl">PLAY AGAIN</button>
+    </div>
+
+    <!-- 抽卡檔案夾畫面 -->
+    <section id="gacha-screen" class="hidden-screen">
+        <div id="gacha-folder" class="gacha-folder gacha-idle" onclick="triggerGacha()"></div>
+        <p class="text-white mt-8 en-pixel blink text-xl">CLICK TO OPEN FILE</p>
+    </section>
+
+    <!-- 抽卡發光展示畫面 (Shiny Reveal) -->
+    <section id="gacha-reveal" class="hidden-screen">
+        <div class="sunburst"></div>
+        <div id="reveal-card" class="reveal-img-container flex items-center justify-center overflow-hidden">
+            <!-- 修正：img 改為 object-contain 以適應任意尺寸 -->
+            <img id="reveal-img" src="" class="w-full h-full object-contain auto-remove-bg" alt="Coach Reveal">
         </div>
     </section>
 
     <!-- 3. Detail Screen -->
-    <section id="detail-screen" class="hidden-screen flex items-center justify-center p-4 overflow-y-auto" style="position: fixed; inset: 0; z-index: 40;">
-        <!-- 半透明遮罩 (加深一點，因為要蓋在動態背景上) -->
-        <div class="absolute inset-0 bg-black bg-opacity-70 pointer-events-none"></div>
-
-        <!-- 卡片容器 -->
-        <div class="pop-in-animation bg-[#f0f0f0] border-4 border-white outline outline-4 outline-black max-w-5xl w-full mx-auto relative my-8 p-4 md:p-6 shadow-[16px_16px_0_0_rgba(0,0,0,0.6)] z-50">
-            
-            <div class="absolute top-2 right-12 md:right-14 flex gap-2">
-                <div class="w-3 h-3 bg-red-500 rounded-full border border-black"></div>
-                <div class="w-3 h-3 bg-yellow-500 rounded-full border border-black"></div>
-                <div class="w-3 h-3 bg-green-500 rounded-full border border-black"></div>
-            </div>
-
-            <!-- 右上角懸浮關閉按鈕 -->
-            <button onclick="goBack()" class="close-btn absolute -top-5 -right-5 md:-top-6 md:-right-6 w-10 h-10 md:w-12 md:h-12 bg-red-500 border-4 border-white outline outline-4 outline-black flex items-center justify-center text-white font-bold hover:bg-red-600 hover:scale-110 transition-transform shadow-lg z-50">
-                X
-            </button>
-
-            <div class="flex flex-col md:flex-row gap-6 md:gap-8 relative z-10">
-                <!-- 左側：角色圖與數值 -->
-                <div class="w-full md:w-5/12 flex flex-col items-center">
-                    <div class="bg-gray-800 p-2 border-4 border-black w-full max-w-[300px] md:max-w-none shadow-[6px_6px_0_0_rgba(0,0,0,0.3)]">
-                        <div class="w-full aspect-[3/4] bg-gray-700 border-2 border-gray-600 relative overflow-hidden glitch-effect breathing-effect group cursor-pointer">
-                            <div id="media-container" class="w-full h-full">
-                                <img id="detail-img" src="" alt="Coach Card" class="w-full h-full object-cover">
-                            </div>
-                            <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] pointer-events-none"></div>
-                            <div class="absolute bottom-0 left-0 bg-black text-white px-2 py-1 text-xs en-pixel border-tr-2 border-white">COACH.EXE</div>
-                        </div>
-                    </div>
-
-                    <!-- 影片控制器 -->
-                    <div id="video-controls" class="hidden w-full max-w-[300px] md:max-w-none mt-2 bg-gray-900 border-2 border-white p-2 flex items-center justify-center gap-4">
-                        <button id="play-pause-btn" class="text-white text-xs en-pixel hover:text-yellow-400 flex items-center gap-2 trigger-sound">
-                            <span>▶</span> PLAY
-                        </button>
-                    </div>
-                    
-                    <!-- 動態數值條 -->
-                    <div class="w-full max-w-[300px] md:max-w-none mt-4 bg-gray-900 border-4 border-white outline outline-2 outline-black p-3 md:p-4 text-white font-mono text-sm">
-                        <p class="text-center text-yellow-300 border-b-2 border-dashed border-gray-600 pb-2 mb-3 en-pixel">ABILITY STATS</p>
-                        
-                        <div class="mb-3">
-                            <div class="flex justify-between mb-1 text-xs">
-                                <span class="text-pink-400">PROFESSIONAL</span> <span id="val-professional">0/100</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 border border-gray-500"><div id="bar-1" class="stat-bar-fill h-full bg-pink-500"></div></div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="flex justify-between mb-1 text-xs">
-                                <span class="text-blue-400">LEADERSHIP</span> <span id="val-leadership">0/100</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 border border-gray-500"><div id="bar-2" class="stat-bar-fill h-full bg-blue-500"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between mb-1 text-xs">
-                                <span class="text-green-400">PASSION</span> <span id="val-passion">0/100</span>
-                            </div>
-                            <div class="h-3 bg-gray-700 border border-gray-500"><div id="bar-3" class="stat-bar-fill h-full bg-green-500"></div></div>
-                        </div>
-                    </div>
+    <section id="detail-screen" class="hidden-screen fixed inset-0 z-40 overflow-y-auto bg-black/70">
+        <div class="min-h-full flex items-center justify-center p-4 py-20">
+            <div class="pop-in-animation bg-[#f0f0f0] border-8 border-white outline outline-4 outline-black max-w-7xl w-full relative p-6 md:p-10 shadow-[20px_20px_0_0_rgba(0,0,0,0.6)] z-50">
+                
+                <div class="absolute top-4 right-20 md:right-24 flex gap-3">
+                    <div class="w-4 h-4 bg-red-500 rounded-full border-2 border-black"></div>
+                    <div class="w-4 h-4 bg-yellow-500 rounded-full border-2 border-black"></div>
+                    <div class="w-4 h-4 bg-green-500 rounded-full border-2 border-black"></div>
                 </div>
 
-                <!-- 右側：資料與對話 -->
-                <div class="w-full md:w-7/12 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center gap-3 mb-4 border-b-4 border-black pb-3">
-                            <div class="w-10 h-10 bg-yellow-400 border-2 border-black flex items-center justify-center text-xl">📂</div>
-                            <div class="overflow-hidden">
-                                <h2 id="detail-title" class="text-xl md:text-3xl font-bold text-black pixel-font leading-none truncate"></h2>
-                                <p class="text-[10px] md:text-xs text-gray-500 en-pixel mt-1">ID: <span id="company-id-display">001</span> // CLASS: CORP</p>
-                            </div>
-                        </div>
+                <button onclick="goBack()" class="close-btn absolute -top-6 -right-6 md:-top-8 md:-right-8 w-12 h-12 md:w-16 md:h-16 bg-red-500 border-4 border-white outline outline-4 outline-black flex items-center justify-center text-white text-2xl font-bold hover:bg-red-600 hover:scale-110 transition-transform shadow-lg z-50">
+                    X
+                </button>
 
-                        <!-- 打字機名言區 -->
-                        <div class="mb-6">
-                            <div class="rpg-dialogue !bg-blue-800 !border-white min-h-[80px] md:min-h-[100px]">
-                                <p class="text-yellow-300 text-[10px] md:text-xs mb-1 en-pixel flex items-center gap-2">
-                                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> MENTOR SAYS:
-                                </p>
-                                <div class="text-base md:text-xl font-bold leading-relaxed text-white">
-                                    <span id="detail-quote"></span><span class="cursor-blink inline-block w-2 h-5 bg-white align-middle ml-1"></span>
+                <div class="flex flex-col md:flex-row gap-8 md:gap-12 relative z-10">
+                    <div class="w-full md:w-1/2 flex flex-col items-center">
+                        <div class="bg-gray-800 p-3 border-4 border-black w-full max-w-[400px] md:max-w-none shadow-[8px_8px_0_0_rgba(0,0,0,0.3)]">
+                            <div class="w-full aspect-[2/3] bg-gray-700 border-2 border-gray-600 relative overflow-hidden glitch-effect breathing-effect group cursor-pointer">
+                                <div id="media-container" class="w-full h-full bg-white flex items-center justify-center"> 
+                                    <img id="detail-img" src="" alt="Coach Card" class="w-full h-full object-contain auto-remove-bg">
                                 </div>
+                                <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] pointer-events-none"></div>
+                                <div class="absolute bottom-0 left-0 bg-black text-white px-3 py-2 text-sm en-pixel border-tr-2 border-white">COACH.EXE</div>
                             </div>
                         </div>
 
-                        <!-- 企業介紹 -->
-                        <div class="mb-6 bg-white p-3 md:p-4 border-2 border-dashed border-gray-400 relative shadow-sm h-40 md:h-48 overflow-y-auto custom-scroll">
-                            <p id="detail-desc" class="text-gray-900 text-sm md:text-base leading-relaxed text-justify whitespace-pre-line"></p>
+                        <div id="video-controls" class="hidden w-full max-w-[400px] md:max-w-none mt-3 bg-gray-900 border-2 border-white p-3 flex items-center justify-center gap-4">
+                            <button id="play-pause-btn" class="text-white text-sm en-pixel hover:text-yellow-400 flex items-center gap-2 trigger-sound">
+                                <span>▶</span> PLAY
+                            </button>
+                        </div>
+                        
+                        <div class="w-full max-w-[400px] md:max-w-none mt-6 bg-gray-900 border-4 border-white outline outline-2 outline-black p-5 text-white font-mono text-base md:text-lg">
+                            <p class="text-center text-yellow-300 border-b-2 border-dashed border-gray-600 pb-2 mb-4 en-pixel text-xl">ABILITY STATS</p>
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-pink-400">PROFESSIONAL</span> <span id="val-professional">0/100</span>
+                                </div>
+                                <div class="h-4 bg-gray-700 border border-gray-500"><div id="bar-1" class="stat-bar-fill h-full bg-pink-500"></div></div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-blue-400">LEADERSHIP</span> <span id="val-leadership">0/100</span>
+                                </div>
+                                <div class="h-4 bg-gray-700 border border-gray-500"><div id="bar-2" class="stat-bar-fill h-full bg-blue-500"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between mb-1">
+                                    <span class="text-green-400">PASSION</span> <span id="val-passion">0/100</span>
+                                </div>
+                                <div class="h-4 bg-gray-700 border border-gray-500"><div id="bar-3" class="stat-bar-fill h-full bg-green-500"></div></div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- 底部按鈕區 -->
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4 mt-auto pt-4 border-t-4 border-black">
-                        <div class="flex items-center gap-3 w-full md:w-auto">
-                            <div class="w-10 h-10 md:w-12 md:h-12 bg-gray-300 border-2 border-black rounded-full overflow-hidden flex-shrink-0">
-                                <img src="https://ui-avatars.com/api/?name=M&background=random" class="w-full h-full object-cover grayscale force-pixel" alt="Icon">
+                    <div class="w-full md:w-1/2 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-4 mb-6 border-b-4 border-black pb-4">
+                                <div class="w-14 h-14 bg-yellow-400 border-4 border-black flex items-center justify-center text-3xl">📂</div>
+                                <div class="overflow-hidden">
+                                    <h2 id="detail-title" class="text-xl md:text-3xl font-bold text-black pixel-font leading-none truncate"></h2>
+                                    <p class="text-sm md:text-base text-gray-600 en-pixel mt-2 font-bold">ID: <span id="company-id-display">001</span> // CLASS: CORP</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-[10px] text-gray-500 font-bold en-pixel">ASSIGNED MENTOR</p>
-                                <p id="detail-coach" class="font-bold text-base md:text-lg text-black"></p>
+
+                            <div class="mb-8">
+                                <div class="rpg-dialogue !bg-blue-800 !border-white min-h-[100px] md:min-h-[140px] p-6">
+                                    <p class="text-yellow-300 text-sm md:text-base mb-2 en-pixel flex items-center gap-2">
+                                        <span class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span> MENTOR SAYS:
+                                    </p>
+                                    <div class="text-xl md:text-3xl font-bold leading-relaxed text-white">
+                                        <span id="detail-quote"></span><span class="cursor-blink inline-block w-3 h-6 md:w-4 md:h-8 bg-white align-middle ml-1"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 修正：介紹區塊高度擴增 h-64 md:h-96 -->
+                            <div class="mb-8 bg-white p-4 md:p-6 border-4 border-dashed border-gray-400 relative shadow-sm h-64 md:h-96 overflow-y-auto custom-scroll">
+                                <p id="detail-desc" class="text-gray-900 text-lg md:text-xl leading-loose text-justify whitespace-pre-line font-medium"></p>
                             </div>
                         </div>
-                        
-                        <button onclick="goBack()" class="pixel-btn bg-red-500 text-white w-full md:w-auto hover:bg-red-600 hover:scale-105 transition-transform flex items-center justify-center gap-2 trigger-sound">
-                            <span>◀</span> RETURN TO MAP
-                        </button>
+
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mt-auto pt-6 border-t-4 border-black">
+                            <div class="flex items-center gap-4 w-full md:w-auto">
+                                <div class="w-14 h-14 md:w-16 md:h-16 bg-gray-300 border-2 border-black rounded-full overflow-hidden flex-shrink-0">
+                                    <img src="https://ui-avatars.com/api/?name=M&background=random" class="w-full h-full object-cover grayscale force-pixel" alt="Icon">
+                                </div>
+                                <div>
+                                    <p class="text-xs md:text-sm text-gray-500 font-bold en-pixel">ASSIGNED MENTOR</p>
+                                    <p id="detail-coach" class="font-bold text-lg md:text-2xl text-black"></p>
+                                </div>
+                            </div>
+                            
+                            <button onclick="goBack()" class="pixel-btn bg-red-500 text-white w-full md:w-auto hover:bg-red-600 hover:scale-105 transition-transform flex items-center justify-center gap-3 text-lg md:text-xl trigger-sound">
+                                <span>◀</span> RETURN TO MAP
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -401,273 +614,32 @@
     </section>
 
     <script>
-        // --- 1. 資料設定區 ---
-        
+        // --- 1. 資料設定區 (24家企業，已更新資料) ---
         const companies = [
-            { 
-                id: 1, 
-                name: "台灣積體電路製造(股)有限公司", 
-                shortName: "台積電 TSMC",
-                coach: "資深經理", 
-                logo: "https://static.wixstatic.com/media/79893c_ea4516cec7a04affba07536f131c15c8%7Emv2_d_2248_1499_s_2.jpg/v1/fit/w_1000%2Ch_1000%2Cal_c%2Cq_80/file.png", 
-                coachImage: "https://placehold.co/400x600/2563eb/white?text=TSMC+Coach",
-                desc: "【部門】人力資源業務夥伴處營運組織\n【地點】台南\n\n全球第一家，也是最大的積體電路製造服務（晶圓代工）企業。在這裡你可以學到最先進的半導體製程與管理技術，挑戰極限。",
-                quote: "創新是我們的命脈，誠信是我們的基石。",
-                stats: { professional: 98, leadership: 90, passion: 85 } 
-            },
-            { 
-                id: 2, 
-                name: "中國信託商業銀行(股)有限公司", 
-                shortName: "中國信託",
-                coach: "協理", 
-                logo: "https://osaas.commerce.nccu.edu.tw/uploads/media/14933719804.png",
-                coachImage: "https://placehold.co/400x600/007da3/white?text=CTBC+Coach",
-                desc: "【部門】企業金融處\n【地點】台南/高雄\n\n台灣最國際化的銀行之一，致力於守護客戶的財富，並創造共同的價值。",
-                quote: "We are Family，不僅是口號，更是我們的服務精神。",
-                stats: { professional: 92, leadership: 95, passion: 90 } 
-            },
-            { 
-                id: 3, 
-                name: "聯華電子股份有限公司", 
-                shortName: "聯華電子 UMC",
-                coach: "處長", 
-                logo: "https://www.ioiotimes.com/wordpress/wp-content/uploads/2023/03/20230303-NEWS-313.jpg", 
-                coachImage: "https://placehold.co/400x600/1e40af/white?text=UMC+Coach",
-                desc: "【部門】人力資源處 / 處長室\n【地點】台南\n\n專注於邏輯及特殊技術晶片代工，為跨越電子行業的各項主要應用產品生產晶片。",
-                quote: "以人為本，追求卓越，與客戶共同成長。",
-                stats: { professional: 90, leadership: 90, passion: 92 }
-            },
-            { 
-                id: 4, 
-                name: "統一企業股份有限公司", 
-                shortName: "統一企業",
-                coach: "資深經理", 
-                logo: "https://upload.wikimedia.org/wikipedia/zh/thumb/a/a2/Uni-President_Taiwan_logo.svg/250px-Uni-President_Taiwan_logo.svg.png", 
-                coachImage: "https://placehold.co/400x600/e06c00/white?text=Uni-P+Coach",
-                desc: "【部門】總經理室\n【地點】台南\n\n深耕台灣，佈局亞洲。統一企業提供多元的民生消費產品，我們重視品牌經營與通路管理。",
-                quote: "三好一公道，誠實勤道，創新求進。",
-                stats: { professional: 95, leadership: 88, passion: 96 }
-            },
-            { 
-                id: 5, 
-                name: "璨揚企業股份有限公司", 
-                shortName: "璨揚企業",
-                coach: "經理", 
-                logo: "https://th.bing.com/th/id/OIP.zaQujUaoCI0M7U9iooauPQHaCh?w=323&h=119&c=7&r=0&o=7&pid=1.7&rm=3", 
-                coachImage: "https://placehold.co/400x600/dc2626/white?text=TYC+Coach",
-                desc: "【部門】人力資源部\n【地點】台南\n\n台灣最大的卡車拖車車燈製造廠，我們照亮世界前行的道路。",
-                quote: "點亮的不只是車燈，更是對品質的堅持與承諾。",
-                stats: { professional: 88, leadership: 85, passion: 98 }
-            },
-            { 
-                id: 6, 
-                name: "雲報股份有限公司", 
-                shortName: "雲報",
-                coach: "發行人兼總編輯", 
-                logo: "https://img1.wsimg.com/isteam/ip/ce835593-9f92-49a2-9039-43fe1df844fb/773790.jpg/:/rs=w:105,h:75,cg:true,m/cr=w:105,h:75/qt=q:95", 
-                coachImage: "https://placehold.co/400x600/4b5563/white?text=Yunbao+Coach",
-                desc: "【職稱】發行人兼總編輯\n【地點】台北\n\n專注於深度報導與數位內容策展，讓有價值的資訊被更多人看見。",
-                quote: "在資訊爆炸的時代，我們傳遞真實與觀點。",
-                stats: { professional: 94, leadership: 96, passion: 90 }
-            },
-            { 
-                id: 7, 
-                name: "翔英融創股份有限公司", 
-                shortName: "翔英融創",
-                coach: "副總經理", 
-                logo: "https://nadaholdings.com/wp-content/uploads/2022/05/NADA-HOLDINGS_favicon-150x150.png", 
-                coachImage: "https://placehold.co/400x600/6366f1/white?text=XY+Coach",
-                desc: "【職稱】副總經理\n【地點】台北\n\n結合科技與創新，為企業提供數位轉型與融資解決方案。",
-                quote: "想像力是創新的起點，執行力是成功的關鍵。",
-                stats: { professional: 90, leadership: 92, passion: 95 }
-            },
-            { 
-                id: 8, 
-                name: "信義房屋股份有限公司", 
-                shortName: "信義房屋",
-                coach: "協理", 
-                logo: "https://tse4.mm.bing.net/th/id/OIP.19-3ZoZrnkCdXE4Y-8p41gHaD0?rs=1&pid=ImgDetMain&o=7&rm=3", 
-                coachImage: "https://placehold.co/400x600/10b981/white?text=Sinyi+Coach",
-                desc: "【部門】仲介營運三處\n【地點】台南\n\n堅持企業社會責任，提供客戶安全、透明、溫暖的房地產服務。",
-                quote: "先義後利，義利合一。信任，帶來新幸福。",
-                stats: { professional: 91, leadership: 94, passion: 97 }
-            },
-            { 
-                id: 9, 
-                name: "資誠聯合會計師事務所", 
-                shortName: "資誠 PwC",
-                coach: "副總/執業會計師", 
-                logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/PricewaterhouseCoopers_Logo.svg", 
-                coachImage: "https://placehold.co/400x600/d97706/white?text=PwC+Coach",
-                desc: "【部門】審計\n【地點】台南/台北\n\n全球頂尖的專業服務機構，協助企業解決複雜的商業挑戰，建立社會信任。",
-                quote: "解決重要問題，營造社會誠信。",
-                stats: { professional: 99, leadership: 85, passion: 88 }
-            },
-            { 
-                id: 10, 
-                name: "華泰電子股份有限公司", 
-                shortName: "華泰電子 OSE",
-                coach: "經理", 
-                logo: "https://sorting-house.com.tw/wp-content/uploads/2016/09/005-1.jpg", 
-                coachImage: "https://placehold.co/400x600/0891b2/white?text=OSE+Coach",
-                desc: "【部門】人力資源\n【地點】高雄\n\n台灣歷史悠久的半導體封裝測試公司，重視人才培育與技術深耕。",
-                quote: "穩健踏實，精益求精，共創未來。",
-                stats: { professional: 89, leadership: 88, passion: 90 }
-            },
-            { 
-                id: 11, 
-                name: "裕隆集團", 
-                shortName: "裕隆集團",
-                coach: "經理", 
-                logo: "https://www.yulon-group.com/resource/20230428155216984.png", 
-                coachImage: "https://placehold.co/400x600/1e3a8a/white?text=Yulon+Coach",
-                desc: "【部門】總管理處 人力資源部\n【地點】新北\n\n台灣汽車工業的領航者，致力於實現移動的夢想與價值。",
-                quote: "人車生活，夢想前行。駛向無限可能。",
-                stats: { professional: 92, leadership: 90, passion: 93 }
-            },
-            { 
-                id: 12, 
-                name: "台灣國際航電(Garmin)", 
-                shortName: "Garmin",
-                coach: "資深協理", 
-                logo: "https://campustalent.careercenter.ncu.edu.tw/storage/company_logo/23527104_logo.png", 
-                coachImage: "https://placehold.co/400x600/000000/white?text=Garmin+Coach",
-                desc: "【部門】總管理處 人力資源部\n【地點】桃園/台南\n\n全球衛星導航領導品牌，產品橫跨航空、航海、車用、健身與戶外導航。",
-                quote: "Beat Yesterday. 贏過昨天的自己。",
-                stats: { professional: 96, leadership: 92, passion: 95 }
-            },
-            { 
-                id: 13, 
-                name: "永豐商業銀行股份有限公司", 
-                shortName: "永豐銀行",
-                coach: "副處長", 
-                logo: "https://bank.sinopac.com/sinopacBT/webevents/1808_salarybuild/images/sinopac_logo_m.jpg", 
-                coachImage: "https://placehold.co/400x600/b91c1c/white?text=SinoPac+Coach",
-                desc: "【部門】數位金融處\n【地點】台北\n\n以金融成就生活，提供客戶最便捷、溫暖的數位金融體驗。",
-                quote: "翻轉金融，共創美好生活 (Together, a better life)。",
-                stats: { professional: 93, leadership: 89, passion: 94 }
-            },
-            { 
-                id: 14, 
-                name: "新加坡商鈦坦科技", 
-                shortName: "鈦坦科技",
-                coach: "部門主管", 
-                logo: "https://tse2.mm.bing.net/th/id/OIP.6b9AFHqwYn7lYvNcF6yPKwHaC2?rs=1&pid=ImgDetMain&o=7&rm=3", 
-                coachImage: "https://placehold.co/400x600/000000/F7D51D?text=Titan+Coach",
-                desc: "【部門】開發部門\n【地點】高雄\n\n專注於軟體開發與敏捷管理的科技公司，擁有極度彈性與活力的企業文化。",
-                quote: "超越自我，享受挑戰 (Never Stop Improving)。",
-                stats: { professional: 95, leadership: 95, passion: 100 }
-            },
-            { 
-                id: 15, 
-                name: "美商英特格有限公司台灣分公司", 
-                shortName: "英特格 Entegris",
-                coach: "資深經理", 
-                logo: "https://mms.businesswire.com/media/20230510005102/zh-HK/804442/5/ENTG-logo-Businesswire.jpg?download=1", 
-                coachImage: "https://placehold.co/400x600/6d28d9/white?text=Entegris+Coach",
-                desc: "【部門】人力資源部門\n【地點】高雄\n\n全球先進材料與製程解決方案供應商，在半導體生態系中扮演關鍵角色。",
-                quote: "Pure Advantage. 純淨與創新的優勢。",
-                stats: { professional: 94, leadership: 88, passion: 90 }
-            },
-            { 
-                id: 16, 
-                name: "美商科林研發股份有限公司", 
-                shortName: "科林研發 Lam",
-                coach: "資深營運處長", 
-                logo: "https://www.tsia.org.tw/api/GetDownloadMemberInfoLogoJpg?id=11", 
-                coachImage: "https://placehold.co/400x600/0f172a/white?text=Lam+Coach",
-                desc: "【職稱】資深營運處長\n【地點】新竹\n\n全球半導體設備領導廠商，驅動科技進步的幕後推手。",
-                quote: "Prove it properly. 實事求是，追求極致。",
-                stats: { professional: 98, leadership: 95, passion: 85 }
-            },
-            { 
-                id: 17, 
-                name: "台灣橫渠產學聯盟", 
-                shortName: "橫渠產學聯盟",
-                coach: "秘書長", 
-                logo: "https://tse1.explicit.bing.net/th/id/OIP.64IygBmFyWqnP-p9hRDbHAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", 
-                coachImage: "https://placehold.co/400x600/15803d/white?text=横渠+Coach",
-                desc: "【職稱】秘書長\n【地點】台南\n\n連結學術界與產業界的橋樑，致力於培育跨領域人才與促進產學合作。",
-                quote: "為天地立心，為生民立命，為往聖繼絕學，為萬世開太平。",
-                stats: { professional: 90, leadership: 98, passion: 95 }
-            },
-            { 
-                id: 18, 
-                name: "台灣職涯發展協會", 
-                shortName: "職涯發展協會",
-                coach: "常務監事", 
-                logo: "https://scontent.fkhh2-2.fna.fbcdn.net/v/t39.30808-6/515636081_24844157505202382_1289786258779538948_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=8erBvl39QLEQ7kNvwEW8DoZ&_nc_oc=AdkPkTuZQ75Lslr4ZoOsu1PLoZrnopAx4sfszTbT50r5eUvhGTD0TCD7WSC8AQ17avLsiCMNZg9SdLpvAM4EovE6&_nc_zt=23&_nc_ht=scontent.fkhh2-2.fna&_nc_gid=RoDFMxkTyaCSxcIOAFoR2Q&oh=00_Afl0VUy1ZUoJH9_3aI94NQn2IVUtd-ekf7jGtQC9wqJqcA&oe=69520F96", 
-                coachImage: "https://placehold.co/400x600/be123c/white?text=TCDA+Coach",
-                desc: "【職稱】常務監事\n【地點】台南\n\n推動職涯發展教育，協助青年學子與職場人士找到人生方向。",
-                quote: "職涯是場馬拉松，重點不在起跑，而在堅持與方向。",
-                stats: { professional: 92, leadership: 96, passion: 98 }
-            },
-            { 
-                id: 19, 
-                name: "叡揚資訊股份有限公司", 
-                shortName: "叡揚資訊",
-                coach: "處長", 
-                logo: "https://www.taiwanexcellence.org/upload/firm/logo/22425662.jpg", 
-                coachImage: "https://placehold.co/400x600/0369a1/white?text=GSS+Coach",
-                desc: "【部門】企劃暨組織發展總處\n【地點】高雄\n\n台灣軟體業的領導品牌，專注於企業e化應用軟體與雲端服務。",
-                quote: "品質與價值，承諾必達。",
-                stats: { professional: 93, leadership: 90, passion: 90 }
-            },
-            { 
-                id: 20, 
-                name: "合聯電網科技有限公司", 
-                shortName: "合聯電網",
-                coach: "總經理", 
-                logo: "https://www.taiwanarena.tech/upload/catalog_startups_list_pic/enL_catalog_startups_25E08_ZPJ2iZctNL.jpg", 
-                coachImage: "https://placehold.co/400x600/374151/white?text=Heli+Coach",
-                desc: "【職稱】總經理\n【地點】台北\n\n專注於智慧電網與能源管理的創新科技公司，為永續能源貢獻心力。",
-                quote: "連結能源，串起智慧未來。",
-                stats: { professional: 95, leadership: 92, passion: 92 }
-            },
-            { 
-                id: 21, 
-                name: "台灣優衣庫有限公司(UNIQLO)", 
-                shortName: "UNIQLO",
-                coach: "待定", 
-                logo: "https://upload.wikimedia.org/wikipedia/commons/9/92/UNIQLO_logo.svg", 
-                coachImage: "https://placehold.co/400x600/ef4444/white?text=UNIQLO+Coach",
-                desc: "【職稱/部門】待定\n【地點】台南/台北\n\nLifeWear，讓所有人的生活更加美好。透過服裝改變世界。",
-                quote: "改變服裝，改變常識，改變世界。",
-                stats: { professional: 90, leadership: 90, passion: 95 }
-            },
-            { 
-                id: 22, 
-                name: "臻鼎科技集團", 
-                shortName: "臻鼎科技",
-                coach: "經理", 
-                logo: "https://tse1.mm.bing.net/th/id/OIP.yaT0IfoDROpXrbL9ELLh8QAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", 
-                coachImage: "https://placehold.co/400x600/312e81/white?text=ZDT+Coach",
-                desc: "【部門】人力資源部\n【地點】桃園/高雄\n\n全球第一大PCB製造商，提供多樣化的電路板產品與服務。",
-                quote: "發展科技，造福人類；精進環保，讓地球更美好。",
-                stats: { professional: 94, leadership: 89, passion: 91 }
-            },
-            { 
-                id: 23, 
-                name: "傳振企業管理顧問股份有限公司", 
-                shortName: "卡內基訓練",
-                coach: "副總經理", 
-                logo: "https://www.carnegie.com.tw/lib/img/carnegie-logo3.png", 
-                coachImage: "https://placehold.co/400x600/1e293b/white?text=Carnegie+Coach",
-                desc: "【備註】卡內基訓練\n【地點】台北\n\n全球知名的人際關係與溝通訓練機構，幫助人們發揮潛力，增強影響力。",
-                quote: "一個人的成功，15%取決於專業知識，85%取決於人際溝通。",
-                stats: { professional: 98, leadership: 98, passion: 98 }
-            },
-            { 
-                id: 24, 
-                name: "職涯教練-個人組", 
-                shortName: "個人組",
-                coach: "職涯教練", 
-                logo: "https://placehold.co/600x300/fff/525252?text=Personal+Coach", 
-                coachImage: "https://placehold.co/400x600/525252/white?text=Personal+Coach",
-                desc: "【類別】職涯教練-個人組\n\n由資深職場前輩組成的個人教練群，提供一對一的深度職涯諮詢。",
-                quote: "認識自己，是職涯發展的第一步。",
-                stats: { professional: 95, leadership: 95, passion: 100 }
-            }
+            { id: 1, name: "台灣積體電路製造(股)有限公司", shortName: "台積電 TSMC", coach: "資深經理", logo: "https://static.wixstatic.com/media/79893c_ea4516cec7a04affba07536f131c15c8%7Emv2_d_2248_1499_s_2.jpg/v1/fit/w_1000%2Ch_1000%2Cal_c%2Cq_80/file.png", coachImage: "./coach/01.png", desc: "【部門】人力資源業務夥伴處營運組織\n【地點】台南\n\n【企業介紹】台積公司成立於1987年，率先開創了專業積體電路製造服務之商業模式，自此成為世界領先的專業積體電路製造服務公司。台積公司以領先業界的製程技術及設計解決方案組合支援其全球客戶及夥伴生態系統的蓬勃發展，釋放全球半導體產業的創新。", quote: "創新是我們的命脈，誠信是我們的基石。", stats: { professional: 98, leadership: 90, passion: 85 } },
+            { id: 2, name: "中國信託商業銀行(股)有限公司", shortName: "中國信託", coach: "協理", logo: "https://osaas.commerce.nccu.edu.tw/uploads/media/14933719804.png", coachImage: "./coach/02.png", desc: "【部門】企業金融處\n【地點】台南/高雄\n\n【企業介紹】中國信託商銀成立於1966年。營業項目包括存款、放款、保證、外匯、國際金融業務分行(OBU)、信託、信用卡、現金卡、證券、債券、衍生性金融產品等。致力於提供國際化的金融服務，是台灣最國際化的銀行之一。", quote: "We are Family，不僅是口號。", stats: { professional: 92, leadership: 95, passion: 90 } },
+            { id: 3, name: "聯華電子股份有限公司", shortName: "聯華電子 UMC", coach: "處長", logo: "https://www.ioiotimes.com/wordpress/wp-content/uploads/2023/03/20230303-NEWS-313.jpg", coachImage: "./coach/03.png", desc: "【部門】人力資源處 / 處長室\n【地點】台南\n\n【企業介紹】聯華電子為全球半導體晶圓代工業界的領導者，提供高品質的積體電路製造服務，專注於邏輯及特殊技術，為跨越電子行業的各項主要應用產品生產晶片。聯電完整的製程技術及製造解決方案包括邏輯/混合信號、嵌入式高壓解決方案等。", quote: "以人為本，追求卓越。", stats: { professional: 90, leadership: 90, passion: 92 } },
+            { id: 4, name: "統一企業股份有限公司", shortName: "統一企業", coach: "資深經理", logo: "https://upload.wikimedia.org/wikipedia/zh/thumb/a/a2/Uni-President_Taiwan_logo.svg/250px-Uni-President_Taiwan_logo.svg.png", coachImage: "./coach/04.png", desc: "【部門】總經理室\n【地點】台南\n\n【企業介紹】統一企業自1967年創立於臺南永康，堅持「三好一公道」的經營理念（品質好、信用好、服務好、價格公道），已發展成為遍佈全島、跨足大陸、邁向全球的綜合性健康服務民生產業集團。致力於提升消費者的生活品質。", quote: "三好一公道，誠實勤道。", stats: { professional: 95, leadership: 88, passion: 96 } },
+            { id: 5, name: "璨揚企業股份有限公司", shortName: "璨揚企業", coach: "經理", logo: "https://th.bing.com/th/id/OIP.zaQujUaoCI0M7U9iooauPQHaCh?w=323&h=119&c=7&r=0&o=7&pid=1.7&rm=3", coachImage: "./coach/05.png", desc: "【部門】人力資源部\n【地點】台南\n\n【企業介紹】璨揚企業創立於1981年，位於台南市科技工業區，為台灣最大的卡車拖車車燈製造廠。三十年來不斷創新與研發，產品行銷遍及世界各地。秉持「力行品質至上、超越顧客期望」之品質政策，並善盡社會公民責任。", quote: "點亮的不只是車燈，更是承諾。", stats: { professional: 88, leadership: 85, passion: 98 } },
+            { id: 6, name: "雲報股份有限公司", shortName: "雲報", coach: "發行人兼總編輯", logo: "https://img1.wsimg.com/isteam/ip/ce835593-9f92-49a2-9039-43fe1df844fb/773790.jpg/:/rs=w:105,h:75,cg:true,m/cr=w:105,h:75/qt=q:95", coachImage: "./coach/06.png", desc: "【職稱】發行人兼總編輯\n【地點】台北\n\n【企業介紹】《雲報(CloudExpress)》定位為國會與產業之間的互動溝通平台，協助產業界打造更完備的法規環境。發行對象鎖定決策菁英，致力串連政策制定與產業發展，打造能快速反映趨勢、滾動修正觀點的國家政經產業智識引擎。", quote: "傳遞真實與觀點。", stats: { professional: 94, leadership: 96, passion: 90 } },
+            { id: 7, name: "翔英融創股份有限公司", shortName: "翔英融創", coach: "副總經理", logo: "https://nadaholdings.com/wp-content/uploads/2022/05/NADA-HOLDINGS_favicon-150x150.png", coachImage: "./coach/07.png", desc: "【職稱】副總經理\n【地點】台北\n\n【企業介紹】翔英融創由智寶國際與文策院合資成立，致力於推動台灣原創IP踏上國際舞台。透過與日本製作、發行公司合作，引進產業技術與人才交流，期許作為台、日動畫產業對接的專業橋樑，扶植台灣IP成功產製動畫並躍上國際。", quote: "想像力是創新的起點。", stats: { professional: 90, leadership: 92, passion: 95 } },
+            { id: 8, name: "信義房屋股份有限公司", shortName: "信義房屋", coach: "協理", logo: "https://tse4.mm.bing.net/th/id/OIP.19-3ZoZrnkCdXE4Y-8p41gHaD0?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/08.png", desc: "【部門】仲介營運三處\n【地點】台南\n\n【企業介紹】信義房屋成立於1981年，堅持「信義立業，止於至善」的經營理念。首創「不動產說明書」，推動房屋交易透明化。致力於成為居住生活服務第一品牌，並積極投入ESG與社區營造，實踐「先義後利」的企業精神。", quote: "先義後利，義利合一。", stats: { professional: 91, leadership: 94, passion: 97 } },
+            { id: 9, name: "資誠聯合會計師事務所", shortName: "資誠 PwC", coach: "副總/執業會計師", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/PricewaterhouseCoopers_Logo.svg", coachImage: "./coach/09.png", desc: "【部門】審計\n【地點】台南/台北\n\n【企業介紹】資誠(PwC Taiwan)係由朱國璋及陳振銑會計師於1970年創立，為PwC全球聯盟成員。提供審計、稅務、投資理財、價值管理、人力資源等整合性專業服務。運用全球資源，協助客戶精準掌握經濟產業趨勢，提升企業價值。", quote: "解決重要問題，營造社會誠信。", stats: { professional: 99, leadership: 85, passion: 88 } },
+            { id: 10, name: "華泰電子股份有限公司", shortName: "華泰電子 OSE", coach: "經理", logo: "https://sorting-house.com.tw/wp-content/uploads/2016/09/005-1.jpg", coachImage: "./coach/10.png", desc: "【部門】人力資源\n【地點】高雄\n\n【企業介紹】華泰電子專注於記憶體產品，為台灣第一家完全台資的IC封裝代工廠，深獲肯定。自1971年成立以來，透過製程創新與核心優勢，提供積體電路封裝與測試製造服務(IC Packaging & Testing)及專業電子代工製造服務(EMS)。", quote: "穩健踏實，精益求精。", stats: { professional: 89, leadership: 88, passion: 90 } },
+            { id: 11, name: "裕隆日產", shortName: "裕隆日產", coach: "經理", logo: "https://www.brandinlabs.com/wp-content/uploads/2020/03/%E6%96%B0LOGO%E7%B4%B0%E7%AF%80-1-950x475.png", coachImage: "./coach/11.png", desc: "【部門】總管理處 人力資源部\n【地點】新北\n\n【企業介紹】裕隆日產汽車積極創造符合區域風格的優勢車種，並將台灣汽車設計實力推向全球市場。揭櫫「追求顧客滿意、創造企業繁榮、貢獻社會福祉」三大經營理念。在設計、研發、行銷、服務等方面，皆以提高顧客滿意為最終目標。", quote: "人車生活，夢想前行。", stats: { professional: 92, leadership: 90, passion: 93 } },
+            { id: 12, name: "台灣國際航電(Garmin)", shortName: "Garmin", coach: "資深協理", logo: "https://campustalent.careercenter.ncu.edu.tw/storage/company_logo/23527104_logo.png", coachImage: "./coach/12.png", desc: "【部門】總管理處 人力資源部\n【地點】桃園/台南\n\n【企業介紹】Garmin是全球衛星定位系統(GPS)產業的龍頭。自1989年成立以來，在航空、航海、戶外健身、汽車導航等領域全球市佔第一。秉持「創新研發、豐富大家生活」的精神，以產品幫助許多人完成不同領域的旅程記憶。", quote: "Beat Yesterday. 贏過昨天的自己。", stats: { professional: 96, leadership: 92, passion: 95 } },
+            { id: 13, name: "永豐商業銀行股份有限公司", shortName: "永豐銀行", coach: "副處長", logo: "https://bank.sinopac.com/sinopacBT/webevents/1808_salarybuild/images/sinopac_logo_m.jpg", coachImage: "./coach/13.png", desc: "【部門】數位金融處\n【地點】台北\n\n【企業介紹】永豐銀行為永豐金控全資子公司，以綿密的營業網絡、高度創新的商品組合，為客戶提供最佳金融服務。業務範圍含法人金融、個人金融、財富管理等。展望國際，持續創新，致力於「翻轉金融，共創美好生活」。", quote: "翻轉金融，共創美好生活。", stats: { professional: 93, leadership: 89, passion: 94 } },
+            { id: 14, name: "新加坡商鈦坦科技", shortName: "鈦坦科技", coach: "部門主管", logo: "https://tse2.mm.bing.net/th/id/OIP.6b9AFHqwYn7lYvNcF6yPKwHaC2?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/14.png", desc: "【部門】開發部門\n【地點】高雄\n\n【企業介紹】鈦坦科技是一間總部位於新加坡的軟體開發公司，專注於線上軟體平台客製開發與維護。採用敏捷開發(Agile)模式，重視透明度與開放性。秉持「超越自我 Never Stop Improving」的理念，提供靈活應變的產品解決方案。", quote: "Never Stop Improving.", stats: { professional: 95, leadership: 95, passion: 100 } },
+            { id: 15, name: "美商英特格有限公司台灣分公司", shortName: "英特格 Entegris", coach: "資深經理", logo: "https://mms.businesswire.com/media/20230510005102/zh-HK/804442/5/ENTG-logo-Businesswire.jpg?download=1", coachImage: "./coach/15.png", desc: "【部門】人力資源部門\n【地點】高雄\n\n【企業介紹】Entegris是半導體與其他高科技產業的特用化學品與先進材料解決方案領導供應商。核心競爭力展現於材料科學、微污染控制、高階材料及卓越製造。協助客戶提升良率、降低成本，為先進製程提供關鍵支援。", quote: "Pure Advantage.", stats: { professional: 94, leadership: 88, passion: 90 } },
+            { id: 16, name: "美商科林研發股份有限公司", shortName: "科林研發 Lam", coach: "資深營運處長", logo: "https://www.tsia.org.tw/api/GetDownloadMemberInfoLogoJpg?id=11", coachImage: "./coach/16.png", desc: "【職稱】資深營運處長\n【地點】新竹\n\n【企業介紹】科林研發(Lam Research)是全球前三大半導體設備製造商，總部位於美國矽谷。專門生產、設計、銷售半導體設備，掌握蝕刻和薄膜沉積製程的關鍵技術。提供先進技術與服務給各國半導體業者，驅動科技進步。", quote: "Prove it properly.", stats: { professional: 98, leadership: 95, passion: 85 } },
+            { id: 17, name: "台灣橫渠產學聯盟", shortName: "橫渠產學聯盟", coach: "秘書長", logo: "https://tse1.explicit.bing.net/th/id/OIP.64IygBmFyWqnP-p9hRDbHAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/17.png", desc: "【職稱】秘書長\n【地點】台南\n\n【企業介紹】橫渠產學聯盟致力於為台灣打造以能力為核心的大學產業創新人才培育生態圈。專注產業思維教育，提升學生軟實力，並連結專業夥伴，使所學能有所用。秉持「過河要搭橋，造林要育苗」的理念，共創產學價值。", quote: "連結學術界與產業界的橋樑。", stats: { professional: 90, leadership: 98, passion: 95 } },
+            { id: 18, name: "台灣職涯發展協會", shortName: "職涯發展協會", coach: "常務監事", logo: "https://scontent.fkhh2-2.fna.fbcdn.net/v/t39.30808-6/515636081_24844157505202382_1289786258779538948_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=8erBvl39QLEQ7kNvwEW8DoZ&_nc_oc=AdkPkTuZQ75Lslr4ZoOsu1PLoZrnopAx4sfszTbT50r5eUvhGTD0TCD7WSC8AQ17avLsiCMNZg9SdLpvAM4EovE6&_nc_zt=23&_nc_ht=scontent.fkhh2-2.fna&_nc_gid=RoDFMxkTyaCSxcIOAFoR2Q&oh=00_Afl0VUy1ZUoJH9_3aI94NQn2IVUtd-ekf7jGtQC9wqJqcA&oe=69520F96", coachImage: "./coach/18.png", desc: "【職稱】常務監事\n【地點】台南\n\n【企業介紹】台灣職涯發展協會致力於推廣正確的職涯發展觀念，協助個人探索潛能、規劃職涯路徑。透過舉辦講座、工作坊與諮詢服務，培育專業職涯諮詢師，並連結產學資源，幫助青年與轉職者在職場馬拉松中找到穩健前行的步伐。", quote: "職涯是場馬拉松。", stats: { professional: 92, leadership: 96, passion: 98 } },
+            { id: 19, name: "叡揚資訊股份有限公司", shortName: "叡揚資訊", coach: "處長", logo: "https://www.taiwanexcellence.org/upload/firm/logo/22425662.jpg", coachImage: "./coach/19.png", desc: "【部門】企劃暨組織發展總處\n【地點】高雄\n\n【企業介紹】叡揚資訊為企業e化應用軟體開發與服務領導廠商。推出數位化辦公工具、雲端服務及AI智能對話服務等。擁有30多年的資安及智慧維運經驗，協助客戶推動數位轉型。秉持「品質與價值，承諾必達」的精神服務客戶。", quote: "品質與價值，承諾必達。", stats: { professional: 93, leadership: 90, passion: 90 } },
+            { id: 20, name: "合聯電網科技有限公司", shortName: "合聯電網", coach: "總經理", logo: "https://www.taiwanarena.tech/upload/catalog_startups_list_pic/enL_catalog_startups_25E08_ZPJ2iZctNL.jpg", coachImage: "./coach/20.png", desc: "【職稱】總經理\n【地點】台北\n\n【企業介紹】合聯電網致力於電力系統分析、監測、保護與控制以及智慧電網應用之解決方案。以增進能源使用效率，並確保電力系統之可靠度與穩定性為目標。提供專業的電網技術服務，串起智慧能源的未來。", quote: "連結能源，串起智慧未來。", stats: { professional: 95, leadership: 92, passion: 92 } },
+            { id: 21, name: "台灣優衣庫有限公司(UNIQLO)", shortName: "UNIQLO", coach: "待定", logo: "https://upload.wikimedia.org/wikipedia/commons/9/92/UNIQLO_logo.svg", coachImage: "./coach/21.png", desc: "【職稱/部門】待定\n【地點】台南/台北\n\n【企業介紹】UNIQLO是日本迅銷有限公司(Fast Retailing)的核心品牌，堅持「LifeWear」的品牌理念。透過優質的服裝，改變人們的生活方式。致力於改變服裝、改變常識、改變世界，提供讓所有人生活更美好的日常服裝。", quote: "改變服裝，改變常識，改變世界。", stats: { professional: 90, leadership: 90, passion: 95 } },
+            { id: 22, name: "臻鼎科技集團", shortName: "臻鼎科技", coach: "經理", logo: "https://tse1.mm.bing.net/th/id/OIP.yaT0IfoDROpXrbL9ELLh8QAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/22.png", desc: "【部門】人力資源部\n【地點】桃園/高雄\n\n【企業介紹】臻鼎科技集團是全球領先的印刷電路板(PCB)製造商。提供設計、研發、製造、銷售一站式購足的全方位解決方案。產品廣泛應用於電腦、通訊、消費性電子、車用電子等領域。秉持「發展科技，造福人類」的使命。", quote: "發展科技，造福人類。", stats: { professional: 94, leadership: 89, passion: 91 } },
+            { id: 23, name: "傳振企業管理顧問股份有限公司", shortName: "卡內基訓練", coach: "副總經理", logo: "https://www.carnegie.com.tw/lib/img/carnegie-logo3.png", coachImage: "./coach/23.png", desc: "【備註】卡內基訓練\n【地點】台北\n\n【企業介紹】卡內基訓練是全球知名的人際關係與溝通訓練機構。致力於幫助個人與企業發揮潛能，提升溝通能力、領導力、銷售力與簡報技巧。深信「成功85%取決於人際溝通」，協助學員增強自信，建立良好的人際關係。", quote: "成功85%取決於人際溝通。", stats: { professional: 98, leadership: 98, passion: 98 } },
+            { id: 24, name: "職涯教練-個人組", shortName: "個人組", coach: "職涯教練", logo: "https://placehold.co/600x300/fff/525252?text=Personal+Coach", coachImage: "./coach/24.png", desc: "【類別】職涯教練-個人組\n\n【介紹】這裡匯聚了來自不同領域的專業職涯教練，提供一對一的諮詢與指導。協助你認識自己、探索職涯方向、優化履歷面試技巧，並陪伴你在職涯發展的道路上，跨越挑戰，實現自我價值。", quote: "認識自己，是職涯發展的第一步。", stats: { professional: 95, leadership: 95, passion: 100 } }
         ];
 
         // --- 2. 程式邏輯區 ---
@@ -678,13 +650,28 @@
         const detailScreen = document.getElementById('detail-screen');
         const gridContainer = document.getElementById('grid-container');
         const bgmControl = document.getElementById('bgm-control');
+        const gachaScreen = document.getElementById('gacha-screen');
+        const gachaFolder = document.getElementById('gacha-folder');
+        const gachaReveal = document.getElementById('gacha-reveal');
+        const revealCard = document.getElementById('reveal-card');
+        const revealImg = document.getElementById('reveal-img');
+        const globalBg = document.getElementById('global-bg');
+        const bossStage = document.getElementById('boss-stage');
 
-        // BGM 控制
-        const bgm = new Audio("./music/Pixels.mp3");
-        bgm.loop = true; 
-        bgm.volume = 0.5;
+        // 音樂設定
+        const normalBGM = new Audio("./music/Pixels.mp3"); 
+        normalBGM.loop = true; 
+        normalBGM.volume = 0.5;
 
-        // 音效合成器 (使用 Web Audio API，不需額外檔案)
+        const bossBGM = new Audio("./music/BossBattle.mp3"); 
+        bossBGM.loop = true;
+        bossBGM.volume = 0.6;
+
+        let currentBGM = normalBGM;
+        let isMusicPlaying = false;
+        let hasEncounteredBoss = false; 
+
+        // 音效合成器
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playBeep(frequency = 440, type = 'square', duration = 0.1) {
@@ -700,46 +687,94 @@
             osc.stop(audioCtx.currentTime + duration);
         }
 
-        // 綁定音效到互動元素
+        // BOSS 出場音效
+        function playBossIntroSound() {
+            playBeep(100, 'sawtooth', 0.5);
+            setTimeout(() => playBeep(80, 'sawtooth', 0.5), 400);
+            setTimeout(() => playBeep(60, 'sawtooth', 1.0), 800);
+        }
+
+        // 洗牌音效
+        function playShuffleSound() {
+            playBeep(800, 'triangle', 0.05);
+        }
+
+        // 抽卡音效
+        function playGachaSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.8);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+            osc.stop(audioCtx.currentTime + 0.8);
+            setTimeout(() => playBeep(1500, 'square', 0.3), 800);
+        }
+
         function attachSoundEffects() {
-            // Hover 音效
-            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn').forEach(el => {
-                el.addEventListener('mouseenter', () => playBeep(800, 'sine', 0.05)); // 短促高音
+            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .gacha-folder, .boss-grid-item').forEach(el => {
+                el.addEventListener('mouseenter', () => playBeep(800, 'sine', 0.05));
             });
-            // Click 音效 (這裡主要輔助 HTML 中的 onclick)
             document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn').forEach(el => {
-                el.addEventListener('click', () => playBeep(440, 'square', 0.1)); // 確認音
+                el.addEventListener('click', () => playBeep(440, 'square', 0.1));
             });
         }
 
         function toggleBGM() {
             const bgmStatus = document.getElementById('bgm-status');
-            if (bgm.paused) {
-                bgm.play().catch(e => console.log("BGM play failed:", e));
-                bgmStatus.innerText = "BGM: ON";
-            } else {
-                bgm.pause();
+            if (isMusicPlaying) {
+                currentBGM.pause();
+                isMusicPlaying = false;
                 bgmStatus.innerText = "BGM: OFF";
+            } else {
+                currentBGM.play().catch(e => console.log("BGM play failed:", e));
+                isMusicPlaying = true;
+                bgmStatus.innerText = "BGM: ON";
             }
         }
 
-        // 模擬 Loading 過程
+        function switchBGM(newBGM) {
+            if (currentBGM === newBGM) return; 
+
+            const wasPlaying = isMusicPlaying;
+            currentBGM.pause();
+            currentBGM.currentTime = 0; 
+
+            currentBGM = newBGM;
+            if (wasPlaying) {
+                currentBGM.play().catch(e => console.log("BGM switch failed:", e));
+            }
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
         function simulateLoading() {
             const fill = document.getElementById('loading-fill');
             const text = document.getElementById('loading-text');
             let progress = 0;
-            
             const interval = setInterval(() => {
                 progress += Math.random() * 10;
                 if (progress > 100) progress = 100;
-                
                 fill.style.width = `${progress}%`;
-                
                 if (progress < 30) text.innerText = "LOADING ASSETS...";
                 else if (progress < 60) text.innerText = "GENERATING PIXELS...";
                 else if (progress < 90) text.innerText = "SUMMONING COACHES...";
                 else text.innerText = "READY!";
-
                 if (progress === 100) {
                     clearInterval(interval);
                     setTimeout(() => {
@@ -747,10 +782,9 @@
                         setTimeout(() => {
                             loadingScreen.classList.add('hidden-screen');
                             startScreen.classList.remove('hidden-screen');
-                            // 在 Start Screen 出現後綁定音效
                             attachSoundEffects();
-                        }, 500); // 等待淡出
-                    }, 500); // 稍微停留在 100%
+                        }, 500);
+                    }, 500);
                 }
             }, 100);
         }
@@ -760,7 +794,7 @@
             companies.forEach(company => {
                 const card = document.createElement('div');
                 card.className = 'company-grid-item flex flex-col items-center p-2';
-                card.onclick = () => showDetail(company.id);
+                card.onclick = () => showDetail(company.id); 
                 card.innerHTML = `
                     <div class="w-full aspect-video bg-white border-2 border-black overflow-hidden relative flex items-center justify-center mb-2">
                         <img src="${company.logo}" alt="${company.name}" class="w-full h-full object-contain p-2">
@@ -772,14 +806,12 @@
                 `;
                 gridContainer.appendChild(card);
             });
-            // 重新綁定新生成元素的音效
             attachSoundEffects();
         }
 
         function startGame() {
-            toggleBGM();
-            bgmControl.classList.remove('hidden'); // 顯示 BGM 按鈕
-            
+            toggleBGM(); 
+            bgmControl.classList.remove('hidden');
             startScreen.classList.add('hidden-screen');
             mainMap.classList.remove('hidden-screen');
             mainMap.style.opacity = 0;
@@ -787,56 +819,70 @@
                 mainMap.style.transition = 'opacity 1s';
                 mainMap.style.opacity = 1;
             }, 50);
-        }
-
-        // 打字機效果函數
-        let typeInterval;
-        function typeWriter(text, elementId, speed = 50) {
-            const element = document.getElementById(elementId);
-            element.innerHTML = "";
-            let i = 0;
-            clearInterval(typeInterval); 
             
-            typeInterval = setInterval(() => {
-                if (i < text.length) {
-                    element.innerHTML += text.charAt(i);
-                    i++;
-                    // 打字音效 (每幾個字發出一聲)
-                    if (i % 3 === 0) playBeep(200, 'triangle', 0.05);
-                } else {
-                    clearInterval(typeInterval);
-                }
-            }, speed);
+            // 啟動 Boss 戰偵測器
+            initBossObserver();
         }
 
-        function resetBars() {
-            document.querySelectorAll('.stat-bar-fill').forEach(bar => {
-                bar.style.width = '0%';
-            });
-        }
-
-        function animateBars(stats) {
-            setTimeout(() => {
-                document.getElementById('bar-1').style.width = `${stats.professional}%`;
-                document.getElementById('bar-2').style.width = `${stats.leadership}%`;
-                document.getElementById('bar-3').style.width = `${stats.passion}%`;
-            }, 300);
-        }
+        // --- Gacha 邏輯 ---
+        let currentSelectedId = null;
+        let isGachaOpening = false;
+        const visitedCompanies = new Set();
 
         function showDetail(id) {
+            currentSelectedId = id;
+            if (!visitedCompanies.has(id)) {
+                visitedCompanies.add(id);
+                gachaScreen.classList.remove('hidden-screen');
+                gachaFolder.className = 'gacha-folder gacha-idle';
+                gachaFolder.style.opacity = 1;
+                isGachaOpening = false;
+            } else {
+                renderDetail(id);
+            }
+        }
+
+        function triggerGacha() {
+            if (isGachaOpening) return;
+            isGachaOpening = true;
+            playGachaSound();
+            gachaFolder.className = 'gacha-folder gacha-shake gacha-flash';
+            setTimeout(() => {
+                gachaScreen.classList.add('hidden-screen'); 
+                showShinyReveal(currentSelectedId); 
+            }, 600); 
+        }
+        
+        function showShinyReveal(id) {
             const company = companies.find(c => c.id === id);
             if (!company) return;
+            gachaReveal.classList.remove('hidden-screen');
+            revealImg.src = company.coachImage; 
+            setTimeout(() => {
+                document.querySelector('.sunburst').style.opacity = 1;
+                revealCard.style.transform = 'scale(1.2)';
+                revealCard.style.opacity = 1;
+            }, 100);
+            setTimeout(() => {
+                gachaReveal.classList.add('hidden-screen');
+                document.querySelector('.sunburst').style.opacity = 0;
+                revealCard.style.transform = 'scale(0)';
+                revealCard.style.opacity = 0;
+                renderDetail(id);
+            }, 2500);
+        }
 
+        function renderDetail(id) {
+            const company = companies.find(c => c.id === id);
+            if (!company) return;
             document.getElementById('detail-title').innerText = company.name;
             document.getElementById('company-id-display').innerText = String(company.id).padStart(3, '0');
             document.getElementById('detail-desc').innerText = company.desc;
             document.getElementById('detail-coach').innerText = company.coach;
-
             const stats = company.stats || { professional: 90, leadership: 90, passion: 90 };
             document.getElementById('val-professional').innerText = `${stats.professional}/100`;
             document.getElementById('val-leadership').innerText = `${stats.leadership}/100`;
             document.getElementById('val-passion').innerText = `${stats.passion}/100`;
-
             const mediaContainer = document.getElementById('media-container');
             const videoControls = document.getElementById('video-controls');
             const playPauseBtn = document.getElementById('play-pause-btn');
@@ -849,7 +895,6 @@
                     </video>
                 `;
                 videoControls.classList.remove('hidden');
-                
                 const videoElement = document.getElementById('coach-video');
                 playPauseBtn.onclick = function() {
                     playBeep(440, 'square', 0.1);
@@ -861,40 +906,285 @@
                         playPauseBtn.innerHTML = '<span>⏸</span> PAUSED';
                     }
                 };
-
             } else {
                 mediaContainer.innerHTML = `
-                    <img id="detail-img" src="${company.coachImage}" alt="Coach Card" class="w-full h-full object-cover">
+                    <img id="detail-img" src="${company.coachImage}" alt="Coach Card" class="w-full h-full object-contain auto-remove-bg">
                 `;
                 videoControls.classList.add('hidden');
             }
-
             resetBars();
             detailScreen.classList.remove('hidden-screen');
             document.body.style.overflow = 'hidden';
-
             const quoteText = company.quote || "勇往直前，探索未知的職涯領域！";
             typeWriter(`「${quoteText}」`, 'detail-quote', 40);
             animateBars(stats);
         }
 
+        let typeInterval;
+        function typeWriter(text, elementId, speed = 50) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = "";
+            let i = 0;
+            clearInterval(typeInterval); 
+            typeInterval = setInterval(() => {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    if (i % 3 === 0) playBeep(200, 'triangle', 0.05);
+                } else {
+                    clearInterval(typeInterval);
+                }
+            }, speed);
+        }
+
+        function resetBars() {
+            document.querySelectorAll('.stat-bar-fill').forEach(bar => { bar.style.width = '0%'; });
+        }
+
+        function animateBars(stats) {
+            setTimeout(() => {
+                document.getElementById('bar-1').style.width = `${stats.professional}%`;
+                document.getElementById('bar-2').style.width = `${stats.leadership}%`;
+                document.getElementById('bar-3').style.width = `${stats.passion}%`;
+            }, 300);
+        }
+
         function goBack() {
             const videoElement = document.getElementById('coach-video');
-            if (videoElement) {
-                videoElement.pause();
-            }
-            
+            if (videoElement) { videoElement.pause(); }
             detailScreen.classList.add('hidden-screen');
             document.body.style.overflow = 'auto';
             clearInterval(typeInterval);
         }
 
-        // 初始化
+        // ==========================================
+        // === 3. BOSS 戰鬥系統實作 (隨機洗牌版) ===
+        // ==========================================
+
+        let bossHP = 24;
+        let currentTargetBlock = null;
+
+        const questions = [
+            "1.在職場中新鮮人最常犯的「致命錯誤」是什麼？",
+            "2.我該如何在履歷上展現亮點來吸引人資注意？",
+            "3.面試中問什麼樣的問題，最能展現我的積極態度？",
+            "4.身為職場新鮮人，我有資格談薪水嗎？",
+            "5.如果我想應徵與我科系無關的工作，我該如何說服企業我具備勝任這份工作的潛力？",
+            "6.在第一份工作中，您認為「硬實力」與「軟實力」哪一個比較重要？",
+            "7.您認為現代職場中，最能讓新人脫穎而出的軟實力是什麼？",
+            "8.英文能在實際工作中，真的會頻繁用到嗎？還是這只是一個篩選門檻？",
+            "9.生成式 AI（如 ChatGPT） 越來越普及，您建議新鮮人該如何培養「不被 AI 取代」的能力？",
+            "10.職場上常強調「邏輯思考」和「解決問題的能力」，能否舉一個具體的例子說明這在工作中是如何運作的？",
+            "11.作為菜鳥，我在會議中常常不敢發言或怕說錯話，我該如何克服這種恐懼並適時展現自己？",
+            "12.遇到不會的問題時，我很怕一直問會被嫌煩或覺得能力差，但不問又卡住，請問該如何拿捏「發問」的時機與技巧？",
+            "13.如果遇到觀念比較傳統的主管，或是溝通頻率對不上的前輩，我有什麼方法可以順暢地與他們合作？",
+            "14.職場上真的能交到朋友嗎？還是應該與同事保持「公事公辦」的距離比較安全？",
+            "15.如果我不小心得罪了同事，或是與團隊成員意見不合，當下我該如何圓場或化解尷尬？",
+            "16.對於第一份工作，您會建議先去制度完善的大公司歷練，還是去充滿挑戰與彈性的新創公司？",
+            "17.如何快速觀察並融入當地的「企業文化」或「潛規則」？",
+            "18.如果能回到剛畢業的那一年，您最想對當時準備踏入職場的自己說的一句話是什麼？",
+            "19.如何平衡工作表現與個人生活？",
+            "20.在試用期期間，企業最看重的是什麼？",
+            "21.剛入職時常覺得自己什麼都不會，這種焦慮感該如何排解？",
+            "22.在工作中犯了一個比較嚴重的錯誤，能做什麼來挽回？",
+            "23.第一份工作建議至少要做多久？",
+            "24.新人應該先專注本業，還是可以利用下班時間發展副業？"
+        ];
+
+        // 亂碼字元庫
+        const scrambleChars = "!@#$%^&*()_+{}|:<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        // 初始化 Boss 戰監聽器
+        function initBossObserver() {
+            const target = document.getElementById('boss-stage'); 
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        enterBossMode();
+                    } else {
+                        exitBossMode();
+                    }
+                });
+            }, { threshold: 0.1 }); 
+
+            observer.observe(target);
+            renderBossGrid();
+        }
+
+        function enterBossMode() {
+            globalBg.classList.add('boss-mode');
+            bossStage.style.opacity = 1;
+            bossStage.style.filter = "grayscale(0)";
+            
+            if (!hasEncounteredBoss) {
+                playBossIntroSound();
+                hasEncounteredBoss = true;
+                setTimeout(() => {
+                    switchBGM(bossBGM);
+                }, 1000); 
+            } else {
+                switchBGM(bossBGM);
+            }
+        }
+
+        function exitBossMode() {
+            globalBg.classList.remove('boss-mode');
+            bossStage.style.opacity = 0.5;
+            bossStage.style.filter = "grayscale(1)";
+            switchBGM(normalBGM);
+        }
+
+        function renderBossGrid() {
+            const grid = document.getElementById('boss-grid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 24; i++) {
+                const block = document.createElement('button');
+                block.className = 'boss-grid-item';
+                block.innerText = i + 1;
+                block.dataset.index = i;
+                block.onclick = (e) => openQuestion(e.target);
+                grid.appendChild(block);
+            }
+        }
+
+        // 修改：加入洗牌特效
+        let shuffleInterval;
+        function openQuestion(block) {
+            if (block.classList.contains('cleared')) return;
+            currentTargetBlock = block;
+            
+            const modal = document.getElementById('question-modal');
+            const qText = document.getElementById('q-text');
+            const attackBtn = document.getElementById('attack-btn');
+            
+            modal.classList.remove('hidden');
+            
+            // 暫時禁用攻擊按鈕
+            attackBtn.disabled = true;
+            attackBtn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            const targetIndex = parseInt(block.dataset.index);
+            const finalQuestion = questions[targetIndex] || "ERROR: DATA NOT FOUND";
+            
+            // 開始洗牌
+            qText.classList.add('shuffling');
+            let shuffleCount = 0;
+            const maxShuffles = 20; // 洗牌次數
+
+            clearInterval(shuffleInterval);
+            shuffleInterval = setInterval(() => {
+                // 1. 隨機顯示一個問題 (模擬快速切換)
+                const randomQ = questions[Math.floor(Math.random() * questions.length)];
+                // 2. 或者顯示亂碼
+                // const randomStr = Array(20).fill(0).map(() => scrambleChars[Math.floor(Math.random() * scrambleChars.length)]).join('');
+                
+                qText.innerText = randomQ;
+                playShuffleSound(); // 播放短促音效
+
+                shuffleCount++;
+                if (shuffleCount >= maxShuffles) {
+                    clearInterval(shuffleInterval);
+                    finalizeQuestion(finalQuestion);
+                }
+            }, 60); // 每 60ms 切換一次
+        }
+
+        function finalizeQuestion(text) {
+            const qText = document.getElementById('q-text');
+            const attackBtn = document.getElementById('attack-btn');
+            
+            qText.innerText = text;
+            qText.classList.remove('shuffling');
+            
+            // 播放鎖定音效
+            playBeep(1200, 'sine', 0.2); 
+            
+            // 啟用攻擊按鈕
+            attackBtn.disabled = false;
+            attackBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function closeQuestionModal() {
+            document.getElementById('question-modal').classList.add('hidden');
+            clearInterval(shuffleInterval); // 確保關閉時停止洗牌
+        }
+
+        function triggerDamageEffect() {
+            playBeep(150, 'sawtooth', 0.1); 
+            setTimeout(() => playBeep(50, 'square', 0.4), 50); 
+
+            globalBg.classList.add('damage-mode');
+            setTimeout(() => {
+                globalBg.classList.remove('damage-mode');
+            }, 200);
+        }
+
+        function submitAttack() {
+            triggerDamageEffect();
+            
+            bossHP--;
+            updateBossHPUI();
+            
+            if (currentTargetBlock) {
+                currentTargetBlock.classList.add('cleared');
+                currentTargetBlock.innerText = "";
+            }
+
+            closeQuestionModal();
+
+            if (bossHP <= 0) {
+                setTimeout(triggerVictory, 1000); 
+            }
+        }
+
+        function updateBossHPUI() {
+            const hpBar = document.getElementById('boss-hp-bar');
+            const hpText = document.getElementById('boss-hp-text');
+            const percentage = (bossHP / 24) * 100;
+            
+            hpBar.style.width = `${percentage}%`;
+            hpText.innerText = `${bossHP}/24`;
+            
+            bossStage.style.transform = "translate(5px, 5px)";
+            setTimeout(() => bossStage.style.transform = "translate(0, 0)", 100);
+        }
+
+        function triggerVictory() {
+            const victoryScreen = document.getElementById('victory-screen');
+            victoryScreen.classList.remove('hidden');
+            
+            switchBGM(normalBGM); 
+
+            const notes = [523, 523, 523, 523, 415, 466, 523, 466, 523];
+            let delay = 0;
+            notes.forEach((note, index) => {
+                setTimeout(() => playBeep(note, 'square', 0.15), delay);
+                delay += (index === 3) ? 400 : 150;
+            });
+
+            const duration = 5 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+
+            const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+
         renderGrid();
-        // 啟動 Loading
         window.onload = simulateLoading;
 
     </script>
 </body>
-
 </html>
