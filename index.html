@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>第16屆職涯教練計畫 - 冒險啟程</title>
-    <!-- 引入 Tailwind CSS -->
+    <!-- 引入 Tailwind CSS (使用最新 CDN 以支援更多彈性設定) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
     <!-- 引入 Canvas Confetti (煙火特效用) -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- 引入 SweetAlert2 (用於選擇題互動) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
         :root {
@@ -17,6 +19,7 @@
             --accent-color: #f7d51d;
             --ui-blue: #3b5dc9;
             --boss-red: #ff3333;
+            --chest-brown: #8b4513;
         }
 
         body {
@@ -24,11 +27,18 @@
             font-family: 'DotGothic16', sans-serif; 
             color: #333;
             overflow-x: hidden;
+            /* 確保游標在整個頁面一致 */
             cursor: url('https://cur.cursors-4u.net/cursors/cur-10/cur964.cur'), auto;
         }
 
+        /* 彈性佈局優化：通用響應式設定 */
+        img, video {
+            max-width: 100%;
+            height: auto;
+        }
+
         /* 讓所有可互動元素的游標也變成劍 */
-        a, button, .company-grid-item, .close-btn, .gacha-folder, .pixel-btn, .boss-grid-item {
+        a, button, .company-grid-item, .close-btn, .gacha-folder, .pixel-btn, .boss-grid-item, .wooden-chest {
             cursor: url('https://cur.cursors-4u.net/cursors/cur-10/cur964.cur'), pointer; 
         }
 
@@ -267,15 +277,21 @@
             justify-content: center;
         }
         
-        /* 6x4 Grid System */
+        /* 彈性佈局修正：Boss Grid 網格 */
         .boss-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); 
+            grid-template-columns: repeat(4, 1fr); /* 手機版 4 欄 */
             gap: 8px;
         }
-        @media (min-width: 768px) {
+        @media (min-width: 640px) {
             .boss-grid {
-                grid-template-columns: repeat(6, 1fr); 
+                grid-template-columns: repeat(5, 1fr); /* 平板 5 欄 */
+                gap: 12px;
+            }
+        }
+        @media (min-width: 1024px) {
+            .boss-grid {
+                grid-template-columns: repeat(6, 1fr); /* 桌機 6 欄 */
                 gap: 16px;
             }
         }
@@ -287,7 +303,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: clamp(16px, 2vw, 24px); /* 彈性文字 */
             color: #fff;
             position: relative;
             overflow: hidden;
@@ -306,10 +322,36 @@
         }
         .boss-grid-item.cleared::after {
             content: "❌";
-            font-size: 48px;
+            font-size: clamp(30px, 4vw, 48px);
             position: absolute;
             color: var(--boss-red);
             text-shadow: 2px 2px 0 #000;
+        }
+
+        /* 結算寶箱樣式 (新) */
+        .settlement-chest-container {
+            background-color: transparent !important;
+            border: none !important;
+            cursor: not-allowed;
+            position: relative;
+        }
+        .settlement-chest-img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            filter: grayscale(1) brightness(0.5); /* 未解鎖時黑白 */
+            transition: all 0.5s ease;
+        }
+        .settlement-chest-container.unlocked {
+            cursor: pointer;
+        }
+        .settlement-chest-container.unlocked .settlement-chest-img {
+            filter: grayscale(0) brightness(1); /* 解鎖後彩色 */
+            animation: bounce-chest 2s infinite;
+        }
+        @keyframes bounce-chest {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
         }
 
         /* Boss HP Bar */
@@ -334,6 +376,34 @@
             top: 0; left: 0; bottom: 0; right: 0;
             background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
             background-size: 20px 20px;
+        }
+
+        /* 有獎徵答木箱區 */
+        .quiz-section {
+            margin-top: 40px;
+            padding: 20px;
+            border-top: 4px dashed white;
+            text-align: center;
+        }
+        .wooden-chest {
+            background-color: var(--chest-brown);
+            border: 4px solid #5c2e0a;
+            color: white;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 4px 4px 0 #000;
+            transition: transform 0.1s;
+        }
+        .wooden-chest:hover {
+            transform: translateY(-5px);
+            background-color: #a0522d;
+        }
+        .wooden-chest:active {
+            transform: translateY(0);
         }
 
         /* Question Modal */
@@ -379,6 +449,37 @@
             animation: bounce 2s infinite;
         }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
+
+        /* SweetAlert Customization for Pixel Theme */
+        .swal2-popup {
+            font-family: 'DotGothic16', sans-serif !important;
+            border: 4px solid black !important;
+            border-radius: 0 !important;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.5) !important;
+        }
+        .swal2-title {
+            font-family: 'DotGothic16', sans-serif !important;
+        }
+        .swal2-confirm, .swal2-deny, .swal2-cancel {
+            border: 2px solid black !important;
+            border-radius: 0 !important;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.2) !important;
+        }
+
+        /* Detail Screen Scrollbar */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #888; 
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
 
     </style>
 </head>
@@ -438,7 +539,8 @@
             </div>
         </header>
 
-        <div id="grid-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 pb-24">
+        <!-- 彈性佈局修正：網格系統 -->
+        <div id="grid-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 pb-24">
             <!-- Grid Content -->
         </div>
 
@@ -449,7 +551,7 @@
                 <div class="w-full max-w-4xl relative">
                     <div class="flex justify-between text-white en-pixel mb-2 font-bold text-lg">
                         <span>BOSS HP</span>
-                        <span id="boss-hp-text">24/24</span>
+                        <span id="boss-hp-text">26/26</span>
                     </div>
                     <div class="boss-hp-container">
                         <div id="boss-hp-bar" class="boss-hp-fill"></div>
@@ -457,21 +559,32 @@
                 </div>
             </div>
 
-            <!-- 6x4 Grid System for Boss -->
-            <div class="max-w-4xl mx-auto w-full">
+            <!-- 修正：Grid System for Boss (支援26格) -->
+            <div class="max-w-5xl mx-auto w-full">
                 <div id="boss-grid" class="boss-grid">
                     <!-- Boss Grid Items Generated by JS -->
                 </div>
             </div>
             
             <div class="text-center mt-8 text-white pixel-font text-xl bg-black/50 p-2 rounded">
-                <p>點擊格子進行問題抽選，挑戰成功即可對 BOSS 造成傷害！</p>
+                <p>將 26 個問題全部擊破後，點擊「結算」寶箱即可通關！</p>
             </div>
+
+            <!-- 有獎徵答區 -->
+            <div class="quiz-section">
+                <h3 class="text-yellow-300 text-2xl mb-6 pixel-font">🎁 有獎徵答 Bonus Stage</h3>
+                <div class="flex justify-center gap-8 flex-wrap">
+                    <button class="wooden-chest" onclick="openQuiz(1)">?</button>
+                    <button class="wooden-chest" onclick="openQuiz(2)">?</button>
+                    <button class="wooden-chest" onclick="openQuiz(3)">?</button>
+                </div>
+            </div>
+
         </section>
 
     </section>
 
-    <!-- Question Modal (Updated with Shuffle Effect) -->
+    <!-- Question Modal -->
     <div id="question-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="question-box pop-in-animation">
             <h3 class="text-2xl md:text-3xl text-yellow-300 mb-6 pixel-font">MISSION</h3>
@@ -500,111 +613,114 @@
         <p class="text-white mt-8 en-pixel blink text-xl">CLICK TO OPEN FILE</p>
     </section>
 
-    <!-- 抽卡發光展示畫面 (Shiny Reveal) -->
+    <!-- 抽卡發光展示畫面 -->
     <section id="gacha-reveal" class="hidden-screen">
         <div class="sunburst"></div>
         <div id="reveal-card" class="reveal-img-container flex items-center justify-center overflow-hidden">
-            <!-- 修正：img 改為 object-contain 以適應任意尺寸 -->
             <img id="reveal-img" src="" class="w-full h-full object-contain auto-remove-bg" alt="Coach Reveal">
         </div>
     </section>
 
-    <!-- 3. Detail Screen -->
-    <section id="detail-screen" class="hidden-screen fixed inset-0 z-40 overflow-y-auto bg-black/70">
-        <div class="min-h-full flex items-center justify-center p-4 py-20">
-            <div class="pop-in-animation bg-[#f0f0f0] border-8 border-white outline outline-4 outline-black max-w-7xl w-full relative p-6 md:p-10 shadow-[20px_20px_0_0_rgba(0,0,0,0.6)] z-50">
-                
-                <div class="absolute top-4 right-20 md:right-24 flex gap-3">
-                    <div class="w-4 h-4 bg-red-500 rounded-full border-2 border-black"></div>
-                    <div class="w-4 h-4 bg-yellow-500 rounded-full border-2 border-black"></div>
-                    <div class="w-4 h-4 bg-green-500 rounded-full border-2 border-black"></div>
-                </div>
+    <!-- 3. Detail Screen (Layout Optimized) -->
+    <section id="detail-screen" class="hidden-screen fixed inset-0 z-40 bg-black/70 flex items-center justify-center p-2 md:p-4">
+        
+        <!-- Inner Container with Max Height and Flex Layout -->
+        <div class="pop-in-animation bg-[#f0f0f0] border-8 border-white outline outline-4 outline-black w-full max-w-7xl max-h-[98vh] md:max-h-[95vh] relative shadow-[20px_20px_0_0_rgba(0,0,0,0.6)] z-50 flex flex-col overflow-hidden">
+            
+            <!-- Window Controls Decoration -->
+            <div class="absolute top-3 right-16 md:right-20 flex gap-2 z-10">
+                <div class="w-3 h-3 md:w-4 md:h-4 bg-red-500 rounded-full border-2 border-black"></div>
+                <div class="w-3 h-3 md:w-4 md:h-4 bg-yellow-500 rounded-full border-2 border-black"></div>
+                <div class="w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-black"></div>
+            </div>
 
-                <button onclick="goBack()" class="close-btn absolute -top-6 -right-6 md:-top-8 md:-right-8 w-12 h-12 md:w-16 md:h-16 bg-red-500 border-4 border-white outline outline-4 outline-black flex items-center justify-center text-white text-2xl font-bold hover:bg-red-600 hover:scale-110 transition-transform shadow-lg z-50">
-                    X
-                </button>
-
-                <div class="flex flex-col md:flex-row gap-8 md:gap-12 relative z-10">
-                    <div class="w-full md:w-1/2 flex flex-col items-center">
-                        <div class="bg-gray-800 p-3 border-4 border-black w-full max-w-[400px] md:max-w-none shadow-[8px_8px_0_0_rgba(0,0,0,0.3)]">
+            <!-- Scrollable Content Area -->
+            <div class="overflow-y-auto custom-scroll flex-1 p-4 md:p-8">
+                <div class="flex flex-col md:flex-row gap-6 md:gap-10 min-h-full">
+                    
+                    <!-- Left Column: Image & Stats (Fixed width on desktop if possible) -->
+                    <div class="w-full md:w-5/12 lg:w-4/12 flex flex-col items-center flex-shrink-0">
+                        <div class="bg-gray-800 p-2 border-4 border-black w-full max-w-[300px] md:max-w-none shadow-[6px_6px_0_0_rgba(0,0,0,0.3)] mx-auto">
                             <div class="w-full aspect-[2/3] bg-gray-700 border-2 border-gray-600 relative overflow-hidden glitch-effect breathing-effect group cursor-pointer">
                                 <div id="media-container" class="w-full h-full bg-white flex items-center justify-center"> 
                                     <img id="detail-img" src="" alt="Coach Card" class="w-full h-full object-contain auto-remove-bg">
                                 </div>
                                 <div class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.2)_50%)] bg-[length:100%_4px] pointer-events-none"></div>
-                                <div class="absolute bottom-0 left-0 bg-black text-white px-3 py-2 text-sm en-pixel border-tr-2 border-white">COACH.EXE</div>
+                                <div class="absolute bottom-0 left-0 bg-black text-white px-2 py-1 text-xs en-pixel border-tr-2 border-white">COACH.EXE</div>
                             </div>
                         </div>
 
-                        <div id="video-controls" class="hidden w-full max-w-[400px] md:max-w-none mt-3 bg-gray-900 border-2 border-white p-3 flex items-center justify-center gap-4">
-                            <button id="play-pause-btn" class="text-white text-sm en-pixel hover:text-yellow-400 flex items-center gap-2 trigger-sound">
+                        <div id="video-controls" class="hidden w-full max-w-[300px] md:max-w-none mt-2 bg-gray-900 border-2 border-white p-2 flex items-center justify-center gap-4 mx-auto">
+                            <button id="play-pause-btn" class="text-white text-xs en-pixel hover:text-yellow-400 flex items-center gap-2 trigger-sound">
                                 <span>▶</span> PLAY
                             </button>
                         </div>
                         
-                        <div class="w-full max-w-[400px] md:max-w-none mt-6 bg-gray-900 border-4 border-white outline outline-2 outline-black p-5 text-white font-mono text-base md:text-lg">
-                            <p class="text-center text-yellow-300 border-b-2 border-dashed border-gray-600 pb-2 mb-4 en-pixel text-xl">ABILITY STATS</p>
-                            <div class="mb-4">
-                                <div class="flex justify-between mb-1">
+                        <div class="w-full max-w-[300px] md:max-w-none mt-4 bg-gray-900 border-4 border-white outline outline-2 outline-black p-4 text-white font-mono text-sm md:text-base mx-auto">
+                            <p class="text-center text-yellow-300 border-b-2 border-dashed border-gray-600 pb-1 mb-2 en-pixel">ABILITY STATS</p>
+                            <div class="mb-2">
+                                <div class="flex justify-between mb-1 text-xs">
                                     <span class="text-pink-400">PROFESSIONAL</span> <span id="val-professional">0/100</span>
                                 </div>
-                                <div class="h-4 bg-gray-700 border border-gray-500"><div id="bar-1" class="stat-bar-fill h-full bg-pink-500"></div></div>
+                                <div class="h-3 bg-gray-700 border border-gray-500"><div id="bar-1" class="stat-bar-fill h-full bg-pink-500"></div></div>
                             </div>
-                            <div class="mb-4">
-                                <div class="flex justify-between mb-1">
+                            <div class="mb-2">
+                                <div class="flex justify-between mb-1 text-xs">
                                     <span class="text-blue-400">LEADERSHIP</span> <span id="val-leadership">0/100</span>
                                 </div>
-                                <div class="h-4 bg-gray-700 border border-gray-500"><div id="bar-2" class="stat-bar-fill h-full bg-blue-500"></div></div>
+                                <div class="h-3 bg-gray-700 border border-gray-500"><div id="bar-2" class="stat-bar-fill h-full bg-blue-500"></div></div>
                             </div>
                             <div>
-                                <div class="flex justify-between mb-1">
+                                <div class="flex justify-between mb-1 text-xs">
                                     <span class="text-green-400">PASSION</span> <span id="val-passion">0/100</span>
                                 </div>
-                                <div class="h-4 bg-gray-700 border border-gray-500"><div id="bar-3" class="stat-bar-fill h-full bg-green-500"></div></div>
+                                <div class="h-3 bg-gray-700 border border-gray-500"><div id="bar-3" class="stat-bar-fill h-full bg-green-500"></div></div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="w-full md:w-1/2 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center gap-4 mb-6 border-b-4 border-black pb-4">
-                                <div class="w-14 h-14 bg-yellow-400 border-4 border-black flex items-center justify-center text-3xl">📂</div>
-                                <div class="overflow-hidden">
-                                    <h2 id="detail-title" class="text-xl md:text-3xl font-bold text-black pixel-font leading-none truncate"></h2>
-                                    <p class="text-sm md:text-base text-gray-600 en-pixel mt-2 font-bold">ID: <span id="company-id-display">001</span> // CLASS: CORP</p>
-                                </div>
-                            </div>
-
-                            <div class="mb-8">
-                                <div class="rpg-dialogue !bg-blue-800 !border-white min-h-[100px] md:min-h-[140px] p-6">
-                                    <p class="text-yellow-300 text-sm md:text-base mb-2 en-pixel flex items-center gap-2">
-                                        <span class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span> MENTOR SAYS:
-                                    </p>
-                                    <div class="text-xl md:text-3xl font-bold leading-relaxed text-white">
-                                        <span id="detail-quote"></span><span class="cursor-blink inline-block w-3 h-6 md:w-4 md:h-8 bg-white align-middle ml-1"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- 修正：介紹區塊高度擴增 h-64 md:h-96 -->
-                            <div class="mb-8 bg-white p-4 md:p-6 border-4 border-dashed border-gray-400 relative shadow-sm h-64 md:h-96 overflow-y-auto custom-scroll">
-                                <p id="detail-desc" class="text-gray-900 text-lg md:text-xl leading-loose text-justify whitespace-pre-line font-medium"></p>
+                    <!-- Right Column: Info -->
+                    <div class="w-full md:w-7/12 lg:w-8/12 flex flex-col min-h-0">
+                        <!-- Header Info -->
+                        <div class="flex items-center gap-3 mb-4 border-b-4 border-black pb-2 flex-shrink-0">
+                            <div class="w-10 h-10 md:w-12 md:h-12 bg-yellow-400 border-4 border-black flex items-center justify-center text-2xl">📂</div>
+                            <div class="overflow-hidden">
+                                <h2 id="detail-title" class="text-lg md:text-2xl font-bold text-black pixel-font leading-none truncate"></h2>
+                                <p class="text-xs md:text-sm text-gray-600 en-pixel mt-1 font-bold">ID: <span id="company-id-display">001</span> // CLASS: CORP</p>
                             </div>
                         </div>
 
-                        <div class="flex flex-col md:flex-row justify-between items-center gap-6 mt-auto pt-6 border-t-4 border-black">
-                            <div class="flex items-center gap-4 w-full md:w-auto">
-                                <div class="w-14 h-14 md:w-16 md:h-16 bg-gray-300 border-2 border-black rounded-full overflow-hidden flex-shrink-0">
+                        <!-- Mentor Says Box -->
+                        <div class="mb-4 flex-shrink-0">
+                            <div class="rpg-dialogue !bg-blue-800 !border-white p-4">
+                                <p class="text-yellow-300 text-xs md:text-sm mb-1 en-pixel flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> MENTOR SAYS:
+                                </p>
+                                <div class="text-lg md:text-2xl font-bold leading-relaxed text-white">
+                                    <span id="detail-quote"></span><span class="cursor-blink inline-block w-2 h-5 md:w-3 md:h-6 bg-white align-middle ml-1"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Flexible Description Box -->
+                        <div class="bg-white p-4 border-4 border-dashed border-gray-400 relative shadow-sm flex-1 overflow-y-auto custom-scroll min-h-[150px]">
+                            <p id="detail-desc" class="text-gray-900 text-base md:text-lg leading-relaxed text-justify whitespace-pre-line font-medium"></p>
+                        </div>
+
+                        <!-- Bottom Controls -->
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-4 mt-4 pt-4 border-t-4 border-black flex-shrink-0">
+                            <div class="flex items-center gap-3 w-full md:w-auto">
+                                <div class="w-10 h-10 md:w-12 md:h-12 bg-gray-300 border-2 border-black rounded-full overflow-hidden flex-shrink-0">
                                     <img src="https://ui-avatars.com/api/?name=M&background=random" class="w-full h-full object-cover grayscale force-pixel" alt="Icon">
                                 </div>
                                 <div>
-                                    <p class="text-xs md:text-sm text-gray-500 font-bold en-pixel">ASSIGNED MENTOR</p>
-                                    <p id="detail-coach" class="font-bold text-lg md:text-2xl text-black"></p>
+                                    <p class="text-[10px] md:text-xs text-gray-500 font-bold en-pixel">ASSIGNED MENTOR</p>
+                                    <p id="detail-coach" class="font-bold text-base md:text-xl text-black"></p>
                                 </div>
                             </div>
                             
-                            <button onclick="goBack()" class="pixel-btn bg-red-500 text-white w-full md:w-auto hover:bg-red-600 hover:scale-105 transition-transform flex items-center justify-center gap-3 text-lg md:text-xl trigger-sound">
-                                <span>◀</span> RETURN TO MAP
+                            <button onclick="goBack()" class="pixel-btn bg-red-500 text-white w-full md:w-auto hover:bg-red-600 hover:scale-105 transition-transform flex items-center justify-center gap-2 text-base md:text-lg trigger-sound">
+                                <span>◀</span> RETURN
                             </button>
                         </div>
                     </div>
@@ -614,32 +730,32 @@
     </section>
 
     <script>
-        // --- 1. 資料設定區 (24家企業，已更新資料) ---
+        // --- 1. 資料設定區 (維持 24 家企業) ---
         const companies = [
-            { id: 1, name: "台灣積體電路製造(股)有限公司", shortName: "台積電 TSMC", coach: "資深經理", logo: "https://static.wixstatic.com/media/79893c_ea4516cec7a04affba07536f131c15c8%7Emv2_d_2248_1499_s_2.jpg/v1/fit/w_1000%2Ch_1000%2Cal_c%2Cq_80/file.png", coachImage: "./coach/01.png", desc: "【部門】人力資源業務夥伴處營運組織\n【地點】台南\n\n【企業介紹】台積公司成立於1987年，率先開創了專業積體電路製造服務之商業模式，自此成為世界領先的專業積體電路製造服務公司。台積公司以領先業界的製程技術及設計解決方案組合支援其全球客戶及夥伴生態系統的蓬勃發展，釋放全球半導體產業的創新。", quote: "創新是我們的命脈，誠信是我們的基石。", stats: { professional: 98, leadership: 90, passion: 85 } },
-            { id: 2, name: "中國信託商業銀行(股)有限公司", shortName: "中國信託", coach: "協理", logo: "https://osaas.commerce.nccu.edu.tw/uploads/media/14933719804.png", coachImage: "./coach/02.png", desc: "【部門】企業金融處\n【地點】台南/高雄\n\n【企業介紹】中國信託商銀成立於1966年。營業項目包括存款、放款、保證、外匯、國際金融業務分行(OBU)、信託、信用卡、現金卡、證券、債券、衍生性金融產品等。致力於提供國際化的金融服務，是台灣最國際化的銀行之一。", quote: "We are Family，不僅是口號。", stats: { professional: 92, leadership: 95, passion: 90 } },
-            { id: 3, name: "聯華電子股份有限公司", shortName: "聯華電子 UMC", coach: "處長", logo: "https://www.ioiotimes.com/wordpress/wp-content/uploads/2023/03/20230303-NEWS-313.jpg", coachImage: "./coach/03.png", desc: "【部門】人力資源處 / 處長室\n【地點】台南\n\n【企業介紹】聯華電子為全球半導體晶圓代工業界的領導者，提供高品質的積體電路製造服務，專注於邏輯及特殊技術，為跨越電子行業的各項主要應用產品生產晶片。聯電完整的製程技術及製造解決方案包括邏輯/混合信號、嵌入式高壓解決方案等。", quote: "以人為本，追求卓越。", stats: { professional: 90, leadership: 90, passion: 92 } },
-            { id: 4, name: "統一企業股份有限公司", shortName: "統一企業", coach: "資深經理", logo: "https://upload.wikimedia.org/wikipedia/zh/thumb/a/a2/Uni-President_Taiwan_logo.svg/250px-Uni-President_Taiwan_logo.svg.png", coachImage: "./coach/04.png", desc: "【部門】總經理室\n【地點】台南\n\n【企業介紹】統一企業自1967年創立於臺南永康，堅持「三好一公道」的經營理念（品質好、信用好、服務好、價格公道），已發展成為遍佈全島、跨足大陸、邁向全球的綜合性健康服務民生產業集團。致力於提升消費者的生活品質。", quote: "三好一公道，誠實勤道。", stats: { professional: 95, leadership: 88, passion: 96 } },
-            { id: 5, name: "璨揚企業股份有限公司", shortName: "璨揚企業", coach: "經理", logo: "https://th.bing.com/th/id/OIP.zaQujUaoCI0M7U9iooauPQHaCh?w=323&h=119&c=7&r=0&o=7&pid=1.7&rm=3", coachImage: "./coach/05.png", desc: "【部門】人力資源部\n【地點】台南\n\n【企業介紹】璨揚企業創立於1981年，位於台南市科技工業區，為台灣最大的卡車拖車車燈製造廠。三十年來不斷創新與研發，產品行銷遍及世界各地。秉持「力行品質至上、超越顧客期望」之品質政策，並善盡社會公民責任。", quote: "點亮的不只是車燈，更是承諾。", stats: { professional: 88, leadership: 85, passion: 98 } },
-            { id: 6, name: "雲報股份有限公司", shortName: "雲報", coach: "發行人兼總編輯", logo: "https://img1.wsimg.com/isteam/ip/ce835593-9f92-49a2-9039-43fe1df844fb/773790.jpg/:/rs=w:105,h:75,cg:true,m/cr=w:105,h:75/qt=q:95", coachImage: "./coach/06.png", desc: "【職稱】發行人兼總編輯\n【地點】台北\n\n【企業介紹】《雲報(CloudExpress)》定位為國會與產業之間的互動溝通平台，協助產業界打造更完備的法規環境。發行對象鎖定決策菁英，致力串連政策制定與產業發展，打造能快速反映趨勢、滾動修正觀點的國家政經產業智識引擎。", quote: "傳遞真實與觀點。", stats: { professional: 94, leadership: 96, passion: 90 } },
-            { id: 7, name: "翔英融創股份有限公司", shortName: "翔英融創", coach: "副總經理", logo: "https://nadaholdings.com/wp-content/uploads/2022/05/NADA-HOLDINGS_favicon-150x150.png", coachImage: "./coach/07.png", desc: "【職稱】副總經理\n【地點】台北\n\n【企業介紹】翔英融創由智寶國際與文策院合資成立，致力於推動台灣原創IP踏上國際舞台。透過與日本製作、發行公司合作，引進產業技術與人才交流，期許作為台、日動畫產業對接的專業橋樑，扶植台灣IP成功產製動畫並躍上國際。", quote: "想像力是創新的起點。", stats: { professional: 90, leadership: 92, passion: 95 } },
-            { id: 8, name: "信義房屋股份有限公司", shortName: "信義房屋", coach: "協理", logo: "https://tse4.mm.bing.net/th/id/OIP.19-3ZoZrnkCdXE4Y-8p41gHaD0?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/08.png", desc: "【部門】仲介營運三處\n【地點】台南\n\n【企業介紹】信義房屋成立於1981年，堅持「信義立業，止於至善」的經營理念。首創「不動產說明書」，推動房屋交易透明化。致力於成為居住生活服務第一品牌，並積極投入ESG與社區營造，實踐「先義後利」的企業精神。", quote: "先義後利，義利合一。", stats: { professional: 91, leadership: 94, passion: 97 } },
-            { id: 9, name: "資誠聯合會計師事務所", shortName: "資誠 PwC", coach: "副總/執業會計師", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/PricewaterhouseCoopers_Logo.svg", coachImage: "./coach/09.png", desc: "【部門】審計\n【地點】台南/台北\n\n【企業介紹】資誠(PwC Taiwan)係由朱國璋及陳振銑會計師於1970年創立，為PwC全球聯盟成員。提供審計、稅務、投資理財、價值管理、人力資源等整合性專業服務。運用全球資源，協助客戶精準掌握經濟產業趨勢，提升企業價值。", quote: "解決重要問題，營造社會誠信。", stats: { professional: 99, leadership: 85, passion: 88 } },
-            { id: 10, name: "華泰電子股份有限公司", shortName: "華泰電子 OSE", coach: "經理", logo: "https://sorting-house.com.tw/wp-content/uploads/2016/09/005-1.jpg", coachImage: "./coach/10.png", desc: "【部門】人力資源\n【地點】高雄\n\n【企業介紹】華泰電子專注於記憶體產品，為台灣第一家完全台資的IC封裝代工廠，深獲肯定。自1971年成立以來，透過製程創新與核心優勢，提供積體電路封裝與測試製造服務(IC Packaging & Testing)及專業電子代工製造服務(EMS)。", quote: "穩健踏實，精益求精。", stats: { professional: 89, leadership: 88, passion: 90 } },
-            { id: 11, name: "裕隆日產", shortName: "裕隆日產", coach: "經理", logo: "https://www.brandinlabs.com/wp-content/uploads/2020/03/%E6%96%B0LOGO%E7%B4%B0%E7%AF%80-1-950x475.png", coachImage: "./coach/11.png", desc: "【部門】總管理處 人力資源部\n【地點】新北\n\n【企業介紹】裕隆日產汽車積極創造符合區域風格的優勢車種，並將台灣汽車設計實力推向全球市場。揭櫫「追求顧客滿意、創造企業繁榮、貢獻社會福祉」三大經營理念。在設計、研發、行銷、服務等方面，皆以提高顧客滿意為最終目標。", quote: "人車生活，夢想前行。", stats: { professional: 92, leadership: 90, passion: 93 } },
-            { id: 12, name: "台灣國際航電(Garmin)", shortName: "Garmin", coach: "資深協理", logo: "https://campustalent.careercenter.ncu.edu.tw/storage/company_logo/23527104_logo.png", coachImage: "./coach/12.png", desc: "【部門】總管理處 人力資源部\n【地點】桃園/台南\n\n【企業介紹】Garmin是全球衛星定位系統(GPS)產業的龍頭。自1989年成立以來，在航空、航海、戶外健身、汽車導航等領域全球市佔第一。秉持「創新研發、豐富大家生活」的精神，以產品幫助許多人完成不同領域的旅程記憶。", quote: "Beat Yesterday. 贏過昨天的自己。", stats: { professional: 96, leadership: 92, passion: 95 } },
-            { id: 13, name: "永豐商業銀行股份有限公司", shortName: "永豐銀行", coach: "副處長", logo: "https://bank.sinopac.com/sinopacBT/webevents/1808_salarybuild/images/sinopac_logo_m.jpg", coachImage: "./coach/13.png", desc: "【部門】數位金融處\n【地點】台北\n\n【企業介紹】永豐銀行為永豐金控全資子公司，以綿密的營業網絡、高度創新的商品組合，為客戶提供最佳金融服務。業務範圍含法人金融、個人金融、財富管理等。展望國際，持續創新，致力於「翻轉金融，共創美好生活」。", quote: "翻轉金融，共創美好生活。", stats: { professional: 93, leadership: 89, passion: 94 } },
-            { id: 14, name: "新加坡商鈦坦科技", shortName: "鈦坦科技", coach: "部門主管", logo: "https://tse2.mm.bing.net/th/id/OIP.6b9AFHqwYn7lYvNcF6yPKwHaC2?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/14.png", desc: "【部門】開發部門\n【地點】高雄\n\n【企業介紹】鈦坦科技是一間總部位於新加坡的軟體開發公司，專注於線上軟體平台客製開發與維護。採用敏捷開發(Agile)模式，重視透明度與開放性。秉持「超越自我 Never Stop Improving」的理念，提供靈活應變的產品解決方案。", quote: "Never Stop Improving.", stats: { professional: 95, leadership: 95, passion: 100 } },
-            { id: 15, name: "美商英特格有限公司台灣分公司", shortName: "英特格 Entegris", coach: "資深經理", logo: "https://mms.businesswire.com/media/20230510005102/zh-HK/804442/5/ENTG-logo-Businesswire.jpg?download=1", coachImage: "./coach/15.png", desc: "【部門】人力資源部門\n【地點】高雄\n\n【企業介紹】Entegris是半導體與其他高科技產業的特用化學品與先進材料解決方案領導供應商。核心競爭力展現於材料科學、微污染控制、高階材料及卓越製造。協助客戶提升良率、降低成本，為先進製程提供關鍵支援。", quote: "Pure Advantage.", stats: { professional: 94, leadership: 88, passion: 90 } },
-            { id: 16, name: "美商科林研發股份有限公司", shortName: "科林研發 Lam", coach: "資深營運處長", logo: "https://www.tsia.org.tw/api/GetDownloadMemberInfoLogoJpg?id=11", coachImage: "./coach/16.png", desc: "【職稱】資深營運處長\n【地點】新竹\n\n【企業介紹】科林研發(Lam Research)是全球前三大半導體設備製造商，總部位於美國矽谷。專門生產、設計、銷售半導體設備，掌握蝕刻和薄膜沉積製程的關鍵技術。提供先進技術與服務給各國半導體業者，驅動科技進步。", quote: "Prove it properly.", stats: { professional: 98, leadership: 95, passion: 85 } },
-            { id: 17, name: "台灣橫渠產學聯盟", shortName: "橫渠產學聯盟", coach: "秘書長", logo: "https://tse1.explicit.bing.net/th/id/OIP.64IygBmFyWqnP-p9hRDbHAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/17.png", desc: "【職稱】秘書長\n【地點】台南\n\n【企業介紹】橫渠產學聯盟致力於為台灣打造以能力為核心的大學產業創新人才培育生態圈。專注產業思維教育，提升學生軟實力，並連結專業夥伴，使所學能有所用。秉持「過河要搭橋，造林要育苗」的理念，共創產學價值。", quote: "連結學術界與產業界的橋樑。", stats: { professional: 90, leadership: 98, passion: 95 } },
-            { id: 18, name: "台灣職涯發展協會", shortName: "職涯發展協會", coach: "常務監事", logo: "https://scontent.fkhh2-2.fna.fbcdn.net/v/t39.30808-6/515636081_24844157505202382_1289786258779538948_n.jpg?_nc_cat=110&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=8erBvl39QLEQ7kNvwEW8DoZ&_nc_oc=AdkPkTuZQ75Lslr4ZoOsu1PLoZrnopAx4sfszTbT50r5eUvhGTD0TCD7WSC8AQ17avLsiCMNZg9SdLpvAM4EovE6&_nc_zt=23&_nc_ht=scontent.fkhh2-2.fna&_nc_gid=RoDFMxkTyaCSxcIOAFoR2Q&oh=00_Afl0VUy1ZUoJH9_3aI94NQn2IVUtd-ekf7jGtQC9wqJqcA&oe=69520F96", coachImage: "./coach/18.png", desc: "【職稱】常務監事\n【地點】台南\n\n【企業介紹】台灣職涯發展協會致力於推廣正確的職涯發展觀念，協助個人探索潛能、規劃職涯路徑。透過舉辦講座、工作坊與諮詢服務，培育專業職涯諮詢師，並連結產學資源，幫助青年與轉職者在職場馬拉松中找到穩健前行的步伐。", quote: "職涯是場馬拉松。", stats: { professional: 92, leadership: 96, passion: 98 } },
-            { id: 19, name: "叡揚資訊股份有限公司", shortName: "叡揚資訊", coach: "處長", logo: "https://www.taiwanexcellence.org/upload/firm/logo/22425662.jpg", coachImage: "./coach/19.png", desc: "【部門】企劃暨組織發展總處\n【地點】高雄\n\n【企業介紹】叡揚資訊為企業e化應用軟體開發與服務領導廠商。推出數位化辦公工具、雲端服務及AI智能對話服務等。擁有30多年的資安及智慧維運經驗，協助客戶推動數位轉型。秉持「品質與價值，承諾必達」的精神服務客戶。", quote: "品質與價值，承諾必達。", stats: { professional: 93, leadership: 90, passion: 90 } },
-            { id: 20, name: "合聯電網科技有限公司", shortName: "合聯電網", coach: "總經理", logo: "https://www.taiwanarena.tech/upload/catalog_startups_list_pic/enL_catalog_startups_25E08_ZPJ2iZctNL.jpg", coachImage: "./coach/20.png", desc: "【職稱】總經理\n【地點】台北\n\n【企業介紹】合聯電網致力於電力系統分析、監測、保護與控制以及智慧電網應用之解決方案。以增進能源使用效率，並確保電力系統之可靠度與穩定性為目標。提供專業的電網技術服務，串起智慧能源的未來。", quote: "連結能源，串起智慧未來。", stats: { professional: 95, leadership: 92, passion: 92 } },
-            { id: 21, name: "台灣優衣庫有限公司(UNIQLO)", shortName: "UNIQLO", coach: "待定", logo: "https://upload.wikimedia.org/wikipedia/commons/9/92/UNIQLO_logo.svg", coachImage: "./coach/21.png", desc: "【職稱/部門】待定\n【地點】台南/台北\n\n【企業介紹】UNIQLO是日本迅銷有限公司(Fast Retailing)的核心品牌，堅持「LifeWear」的品牌理念。透過優質的服裝，改變人們的生活方式。致力於改變服裝、改變常識、改變世界，提供讓所有人生活更美好的日常服裝。", quote: "改變服裝，改變常識，改變世界。", stats: { professional: 90, leadership: 90, passion: 95 } },
-            { id: 22, name: "臻鼎科技集團", shortName: "臻鼎科技", coach: "經理", logo: "https://tse1.mm.bing.net/th/id/OIP.yaT0IfoDROpXrbL9ELLh8QAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/22.png", desc: "【部門】人力資源部\n【地點】桃園/高雄\n\n【企業介紹】臻鼎科技集團是全球領先的印刷電路板(PCB)製造商。提供設計、研發、製造、銷售一站式購足的全方位解決方案。產品廣泛應用於電腦、通訊、消費性電子、車用電子等領域。秉持「發展科技，造福人類」的使命。", quote: "發展科技，造福人類。", stats: { professional: 94, leadership: 89, passion: 91 } },
-            { id: 23, name: "傳振企業管理顧問股份有限公司", shortName: "卡內基訓練", coach: "副總經理", logo: "https://www.carnegie.com.tw/lib/img/carnegie-logo3.png", coachImage: "./coach/23.png", desc: "【備註】卡內基訓練\n【地點】台北\n\n【企業介紹】卡內基訓練是全球知名的人際關係與溝通訓練機構。致力於幫助個人與企業發揮潛能，提升溝通能力、領導力、銷售力與簡報技巧。深信「成功85%取決於人際溝通」，協助學員增強自信，建立良好的人際關係。", quote: "成功85%取決於人際溝通。", stats: { professional: 98, leadership: 98, passion: 98 } },
-            { id: 24, name: "職涯教練-個人組", shortName: "個人組", coach: "職涯教練", logo: "https://placehold.co/600x300/fff/525252?text=Personal+Coach", coachImage: "./coach/24.png", desc: "【類別】職涯教練-個人組\n\n【介紹】這裡匯聚了來自不同領域的專業職涯教練，提供一對一的諮詢與指導。協助你認識自己、探索職涯方向、優化履歷面試技巧，並陪伴你在職涯發展的道路上，跨越挑戰，實現自我價值。", quote: "認識自己，是職涯發展的第一步。", stats: { professional: 95, leadership: 95, passion: 100 } }
+            { id: 1, name: "台灣積體電路製造(股)有限公司", shortName: "台積電 TSMC", coach: "資深經理", logo: "https://static.wixstatic.com/media/79893c_ea4516cec7a04affba07536f131c15c8%7Emv2_d_2248_1499_s_2.jpg/v1/fit/w_1000%2Ch_1000%2Cal_c%2Cq_80/file.png", coachImage: "./coach/01.png", desc: "【部門】人力資源業務夥伴處營運組織\n【地點】台南\n\n【企業介紹】台積公司成立於1987年，率先開創了專業積體電路製造服務之商業模式，自此成為世界領先的專業積體電路製造服務公司。台積公司以領先業界的製程技術及設計解決方案組合支援其全球客戶及夥伴生態系統的蓬勃發展，釋放全球半導體產業的創新。", quote: "An investment in knowledge always pays the best interest.", stats: { professional: 98, leadership: 90, passion: 85 } },
+            { id: 2, name: "中國信託商業銀行(股)有限公司", shortName: "中國信託", coach: "協理", logo: "https://osaas.commerce.nccu.edu.tw/uploads/media/14933719804.png", coachImage: "./coach/02.png", desc: "【部門】企業金融處\n【地點】台南/高雄\n\n【企業介紹】中國信託商銀成立於1966年。營業項目包括存款、放款、保證、外匯、國際金融業務分行(OBU)、信託、信用卡、現金卡、證券、債券、衍生性金融產品等。致力於提供國際化的金融服務，是台灣最國際化的銀行之一。", quote: "堅持理想，正面思考，努力會得到代價。", stats: { professional: 92, leadership: 95, passion: 90 } },
+            { id: 3, name: "聯華電子股份有限公司", shortName: "聯華電子 UMC", coach: "處長", logo: "https://www.ioiotimes.com/wordpress/wp-content/uploads/2023/03/20230303-NEWS-313.jpg", coachImage: "./coach/03.png", desc: "【部門】人力資源處 / 處長室\n【地點】台南\n\n【企業介紹】聯華電子為全球半導體晶圓代工業界的領導者，提供高品質的積體電路製造服務，專注於邏輯及特殊技術，為跨越電子行業的各項主要應用產品生產晶片。聯電完整的製程技術及製造解決方案包括邏輯/混合信號、嵌入式高壓解決方案等。", quote: "我不是在幫你找工作，而是在協助你發現適合你的舞台。", stats: { professional: 90, leadership: 90, passion: 92 } },
+            { id: 4, name: "統一企業股份有限公司", shortName: "統一企業", coach: "資深經理", logo: "https://upload.wikimedia.org/wikipedia/zh/thumb/a/a2/Uni-President_Taiwan_logo.svg/250px-Uni-President_Taiwan_logo.svg.png", coachImage: "./coach/04.png", desc: "【部門】總經理室\n【地點】台南\n\n【企業介紹】統一企業自1967年創立於臺南永康，堅持「三好一公道」的經營理念（品質好、信用好、服務好、價格公道），已發展成為遍佈全島、跨足大陸、邁向全球的綜合性健康服務民生產業集團。致力於提升消費者的生活品質。", quote: "唯有熱愛自己的工作，才能做到「身累心不累」的境界。", stats: { professional: 95, leadership: 88, passion: 96 } },
+            { id: 5, name: "璨揚企業股份有限公司", shortName: "璨揚企業", coach: "經理", logo: "https://th.bing.com/th/id/OIP.zaQujUaoCI0M7U9iooauPQHaCh?w=323&h=119&c=7&r=0&o=7&pid=1.7&rm=3", coachImage: "./coach/05.png", desc: "【部門】人力資源部\n【地點】台南\n\n【企業介紹】璨揚企業創立於1981年，位於台南市科技工業區，為台灣最大的卡車拖車車燈製造廠。三十年來不斷創新與研發，產品行銷遍及世界各地。秉持「力行品質至上、超越顧客期望」之品質政策，並善盡社會公民責任。", quote: "專業使你稱職，好奇使你成長，熱情使你傑出。", stats: { professional: 88, leadership: 85, passion: 98 } },
+            { id: 6, name: "雲報股份有限公司", shortName: "雲報", coach: "發行人兼總編輯", logo: "./image/06.png", coachImage: "./coach/06.png", desc: "【職稱】發行人兼總編輯\n【地點】台北\n\n【企業介紹】《雲報(CloudExpress)》定位為國會與產業之間的互動溝通平台，協助產業界打造更完備的法規環境。發行對象鎖定決策菁英，致力串連政策制定與產業發展，打造能快速反映趨勢、滾動修正觀點的國家政經產業智識引擎。", quote: "我們的話，「是」就說「是」，「不是」就說「不是」。", stats: { professional: 94, leadership: 96, passion: 90 } },
+            { id: 7, name: "翔英融創股份有限公司", shortName: "翔英融創", coach: "副總經理", logo: "https://nadaholdings.com/wp-content/uploads/2022/05/NADA-HOLDINGS_favicon-150x150.png", coachImage: "./coach/07.png", desc: "【職稱】副總經理\n【地點】台北\n\n【企業介紹】翔英融創由智寶國際與文策院合資成立，致力於推動台灣原創IP踏上國際舞台。透過與日本製作、發行公司合作，引進產業技術與人才交流，期許作為台、日動畫產業對接的專業橋樑，扶植台灣IP成功產製動畫並躍上國際。", quote: "挑錯總是比較容易，而培養學生改革社會的勇氣，卻是不容易。", stats: { professional: 90, leadership: 92, passion: 95 } },
+            { id: 8, name: "信義房屋股份有限公司", shortName: "信義房屋", coach: "協理", logo: "https://tse4.mm.bing.net/th/id/OIP.19-3ZoZrnkCdXE4Y-8p41gHaD0?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/08.png", desc: "【部門】仲介營運三處\n【地點】台南\n\n【企業介紹】信義房屋成立於1981年，堅持「信義立業，止於至善」的經營理念。首創「不動產說明書」，推動房屋交易透明化。致力於成為居住生活服務第一品牌，並積極投入ESG與社區營造，實踐「先義後利」的企業精神。", quote: "別相信運氣，要相信做了什麼努力產出好運氣。", stats: { professional: 91, leadership: 94, passion: 97 } },
+            { id: 9, name: "資誠聯合會計師事務所", shortName: "資誠 PwC", coach: "副總/執業會計師", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/PricewaterhouseCoopers_Logo.svg", coachImage: "./coach/09.png", desc: "【部門】審計\n【地點】台南/台北\n\n【企業介紹】資誠(PwC Taiwan)係由朱國璋及陳振銑會計師於1970年創立，為PwC全球聯盟成員。提供審計、稅務、投資理財、價值管理、人力資源等整合性專業服務。運用全球資源，協助客戶精準掌握經濟產業趨勢，提升企業價值。", quote: "持續抱持更多好奇心，豐富生活體驗，樂於分享，打磨自身品牌和價值，創造更多選擇優勢。", stats: { professional: 99, leadership: 85, passion: 88 } },
+            { id: 10, name: "華泰電子股份有限公司", shortName: "華泰電子 OSE", coach: "經理", logo: "https://sorting-house.com.tw/wp-content/uploads/2016/09/005-1.jpg", coachImage: "./coach/10.png", desc: "【部門】人力資源\n【地點】高雄\n\n【企業介紹】華泰電子專注於記憶體產品，為台灣第一家完全台資的IC封裝代工廠，深獲肯定。自1971年成立以來，透過製程創新與核心優勢，提供積體電路封裝與測試製造服務(IC Packaging & Testing)及專業電子代工製造服務(EMS)。", quote: "If you do what you’ve always done, you’ll get what you’ve always got.", stats: { professional: 89, leadership: 88, passion: 90 } },
+            { id: 11, name: "裕隆日產", shortName: "裕隆日產", coach: "經理", logo: "./image/11.png", coachImage: "./coach/11.png", desc: "【部門】總管理處 人力資源部\n【地點】新北\n\n【企業介紹】裕隆日產汽車積極創造符合區域風格的優勢車種，並將台灣汽車設計實力推向全球市場。揭櫫「追求顧客滿意、創造企業繁榮、貢獻社會福祉」三大經營理念。在設計、研發、行銷、服務等方面，皆以提高顧客滿意為最終目標。", quote: "意願是行動的起點，堅持是執行的終點。", stats: { professional: 92, leadership: 90, passion: 93 } },
+            { id: 12, name: "台灣國際航電(Garmin)", shortName: "Garmin", coach: "資深協理", logo: "https://campustalent.careercenter.ncu.edu.tw/storage/company_logo/23527104_logo.png", coachImage: "./coach/12.png", desc: "【部門】總管理處 人力資源部\n【地點】桃園/台南\n\n【企業介紹】Garmin是全球衛星定位系統(GPS)產業的龍頭。自1989年成立以來，在航空、航海、戶外健身、汽車導航等領域全球市佔第一。秉持「創新研發、豐富大家生活」的精神，以產品幫助許多人完成不同領域的旅程記憶。", quote: "期待在CCP計畫和大家一起Beat Yesterday. ", stats: { professional: 96, leadership: 92, passion: 95 } },
+            { id: 13, name: "永豐商業銀行股份有限公司", shortName: "永豐銀行", coach: "副處長", logo: "https://bank.sinopac.com/sinopacBT/webevents/1808_salarybuild/images/sinopac_logo_m.jpg", coachImage: "./coach/13.png", desc: "【部門】數位金融處\n【地點】台北\n\n【企業介紹】永豐銀行為永豐金控全資子公司，以綿密的營業網絡、高度創新的商品組合，為客戶提供最佳金融服務。業務範圍含法人金融、個人金融、財富管理等。展望國際，持續創新，致力於「翻轉金融，共創美好生活」。", quote: "你經歷的每一件事，都在為你的未來鋪路。", stats: { professional: 93, leadership: 89, passion: 94 } },
+            { id: 14, name: "新加坡商鈦坦科技", shortName: "鈦坦科技", coach: "部門主管", logo: "https://tse2.mm.bing.net/th/id/OIP.6b9AFHqwYn7lYvNcF6yPKwHaC2?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/14.png", desc: "【部門】開發部門\n【地點】高雄\n\n【企業介紹】鈦坦科技是一間總部位於新加坡的軟體開發公司，專注於線上軟體平台客製開發與維護。採用敏捷開發(Agile)模式，重視透明度與開放性。秉持「超越自我 Never Stop Improving」的理念，提供靈活應變的產品解決方案。", quote: "透過持續學習不斷成長，以終為始地在現實中探索並勇於嘗試各種可能性。", stats: { professional: 95, leadership: 95, passion: 100 } },
+            { id: 15, name: "美商英特格有限公司台灣分公司", shortName: "英特格 Entegris", coach: "資深經理", logo: "https://mms.businesswire.com/media/20230510005102/zh-HK/804442/5/ENTG-logo-Businesswire.jpg?download=1", coachImage: "./coach/15.png", desc: "【部門】人力資源部門\n【地點】高雄\n\n【企業介紹】Entegris是半導體與其他高科技產業的特用化學品與先進材料解決方案領導供應商。核心競爭力展現於材料科學、微污染控制、高階材料及卓越製造。協助客戶提升良率、降低成本，為先進製程提供關鍵支援。", quote: "求職像是一場旅行，過程中可能會迷惘、不安、自我懷疑，你準備好了嗎？路遙遠需要超前佈署，T姊陪你走一段，Don't Worry！", stats: { professional: 94, leadership: 88, passion: 90 } },
+            { id: 16, name: "美商科林研發股份有限公司", shortName: "科林研發 Lam", coach: "資深營運處長", logo: "https://www.tsia.org.tw/api/GetDownloadMemberInfoLogoJpg?id=11", coachImage: "./coach/16.png", desc: "【職稱】資深營運處長\n【地點】新竹\n\n【企業介紹】科林研發(Lam Research)是全球前三大半導體設備製造商，總部位於美國矽谷。專門生產、設計、銷售半導體設備，掌握蝕刻和薄膜沉積製程的關鍵技術。提供先進技術與服務給各國半導體業者，驅動科技進步。", quote: "Be patient,focus on doing one thing well,and then you can confidently define your own path.", stats: { professional: 98, leadership: 95, passion: 85 } },
+            { id: 17, name: "台灣橫渠產學聯盟", shortName: "橫渠產學聯盟", coach: "秘書長", logo: "https://tse1.explicit.bing.net/th/id/OIP.64IygBmFyWqnP-p9hRDbHAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/17.png", desc: "【職稱】秘書長\n【地點】台南\n\n【企業介紹】橫渠產學聯盟致力於為台灣打造以能力為核心的大學產業創新人才培育生態圈。專注產業思維教育，提升學生軟實力，並連結專業夥伴，使所學能有所用。秉持「過河要搭橋，造林要育苗」的理念，共創產學價值。", quote: "選擇適合自己特質的跑道是事業成功的關鍵。", stats: { professional: 90, leadership: 98, passion: 95 } },
+            { id: 18, name: "台灣職涯發展協會", shortName: "職涯發展協會", coach: "常務監事", logo: "./image/18.png", coachImage: "./coach/18.png", desc: "【職稱】常務監事\n【地點】台南\n\n【企業介紹】台灣職涯發展協會致力於推廣正確的職涯發展觀念，協助個人探索潛能、規劃職涯路徑。透過舉辦講座、工作坊與諮詢服務，培育專業職涯諮詢師，並連結產學資源，幫助青年與轉職者在職場馬拉松中找到穩健前行的步伐。", quote: "永遠別因為對失敗的恐懼，阻止自己對好奇的探索！因為人生是一系列的課題，必須實際地走過才能理解。", stats: { professional: 92, leadership: 96, passion: 98 } },
+            { id: 19, name: "叡揚資訊股份有限公司", shortName: "叡揚資訊", coach: "處長", logo: "https://www.taiwanexcellence.org/upload/firm/logo/22425662.jpg", coachImage: "./coach/19.png", desc: "【部門】企劃暨組織發展總處\n【地點】高雄\n\n【企業介紹】叡揚資訊為企業e化應用軟體開發與服務領導廠商。推出數位化辦公工具、雲端服務及AI智能對話服務等。擁有30多年的資安及智慧維運經驗，協助客戶推動數位轉型。秉持「品質與價值，承諾必達」的精神服務客戶。", quote: "「愛」我所擇，越努力越能自由的選擇！", stats: { professional: 93, leadership: 90, passion: 90 } },
+            { id: 20, name: "合聯電網科技有限公司", shortName: "合聯電網", coach: "總經理", logo: "https://www.taiwanarena.tech/upload/catalog_startups_list_pic/enL_catalog_startups_25E08_ZPJ2iZctNL.jpg", coachImage: "./coach/20.png", desc: "【職稱】總經理\n【地點】台北\n\n【企業介紹】合聯電網致力於電力系統分析、監測、保護與控制以及智慧電網應用之解決方案。以增進能源使用效率，並確保電力系統之可靠度與穩定性為目標。提供專業的電網技術服務，串起智慧能源的未來。", quote: "在危機中蘊藏著創造的機會。", stats: { professional: 95, leadership: 92, passion: 92 } },
+            { id: 21, name: "台灣優衣庫有限公司(UNIQLO)", shortName: "UNIQLO", coach: "總監", logo: "https://upload.wikimedia.org/wikipedia/commons/9/92/UNIQLO_logo.svg", coachImage: "./coach/21.png", desc: "【職稱/部門】待定\n【地點】台南/台北\n\n【企業介紹】UNIQLO是日本迅銷有限公司(Fast Retailing)的核心品牌，堅持「LifeWear」的品牌理念。透過優質的服裝，改變人們的生活方式。致力於改變服裝、改變常識、改變世界，提供讓所有人生活更美好的日常服裝。", quote: "你的潛能無限，相信自己。每一天都是超越昨日的契機，邁向更好的自己。", stats: { professional: 90, leadership: 90, passion: 95 } },
+            { id: 22, name: "臻鼎科技集團", shortName: "臻鼎科技", coach: "經理", logo: "https://tse1.mm.bing.net/th/id/OIP.yaT0IfoDROpXrbL9ELLh8QAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/22.png", desc: "【部門】人力資源部\n【地點】桃園/高雄\n\n【企業介紹】臻鼎科技集團是全球領先的印刷電路板(PCB)製造商。提供設計、研發、製造、銷售一站式購足的全方位解決方案。產品廣泛應用於電腦、通訊、消費性電子、車用電子等領域。秉持「發展科技，造福人類」的使命。", quote: "年輕人最重要的是三對：入對產業、選對公司、跟對主管。", stats: { professional: 94, leadership: 89, passion: 91 } },
+            { id: 23, name: "傳振企業管理顧問股份有限公司", shortName: "卡內基訓練", coach: "副總經理", logo: "https://www.carnegie.com.tw/lib/img/carnegie-logo3.png", coachImage: "./coach/23.png", desc: "【備註】卡內基訓練\n【地點】台北\n\n【企業介紹】卡內基訓練是全球知名的人際關係與溝通訓練機構。致力於幫助個人與企業發揮潛能，提升溝通能力、領導力、銷售力與簡報技巧。深信「成功85%取決於人際溝通」，協助學員增強自信，建立良好的人際關係。", quote: "這個世界聲音很多，大部分是雜音，跟著你內心的聲音走到你想去的地方，成為你想成為的樣子。", stats: { professional: 98, leadership: 98, passion: 98 } },
+            { id: 24, name: "職涯教練-個人組", shortName: "個人組", coach: "職涯教練", logo: "https://placehold.co/600x300/fff/525252?text=Personal+Coach", coachImage: "./coach/24.png", desc: "【類別】職涯教練-個人組\n\n【介紹】這裡匯聚了來自不同領域的專業職涯教練，提供一對一的諮詢與指導。協助你認識自己、探索職涯方向、優化履歷面試技巧，並陪伴你在職涯發展的道路上，跨越挑戰，實現自我價值。", quote: "不禁一番寒徹骨，焉得梅花撲鼻香，未經千錘百鍊磨，怎得寶劍露鋒芒，自古成功靠勉強！-郭國平 To see the world, things dangerous to come to,To see behind walls, to draw closer,To find each other and to feel，That is the Purpose of LIFE-許景貞", stats: { professional: 95, leadership: 95, passion: 100 } }
         ];
 
         // --- 2. 程式邏輯區 ---
@@ -717,10 +833,10 @@
         }
 
         function attachSoundEffects() {
-            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .gacha-folder, .boss-grid-item').forEach(el => {
+            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .gacha-folder, .boss-grid-item, .wooden-chest').forEach(el => {
                 el.addEventListener('mouseenter', () => playBeep(800, 'sine', 0.05));
             });
-            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn').forEach(el => {
+            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .wooden-chest').forEach(el => {
                 el.addEventListener('click', () => playBeep(440, 'square', 0.1));
             });
         }
@@ -958,10 +1074,11 @@
         }
 
         // ==========================================
-        // === 3. BOSS 戰鬥系統實作 (隨機洗牌版) ===
+        // === 3. BOSS 戰鬥系統實作 (更新為26題與新機制) ===
         // ==========================================
 
-        let bossHP = 24;
+        let bossHP = 26; // 更新為26滴血
+        let clearedCount = 0; // 計算已消除的格子數
         let currentTargetBlock = null;
 
         const questions = [
@@ -970,25 +1087,27 @@
             "3.面試中問什麼樣的問題，最能展現我的積極態度？",
             "4.身為職場新鮮人，我有資格談薪水嗎？",
             "5.如果我想應徵與我科系無關的工作，我該如何說服企業我具備勝任這份工作的潛力？",
-            "6.在第一份工作中，您認為「硬實力」與「軟實力」哪一個比較重要？",
+            "6.再來一次",
             "7.您認為現代職場中，最能讓新人脫穎而出的軟實力是什麼？",
             "8.英文能在實際工作中，真的會頻繁用到嗎？還是這只是一個篩選門檻？",
-            "9.生成式 AI（如 ChatGPT） 越來越普及，您建議新鮮人該如何培養「不被 AI 取代」的能力？",
-            "10.職場上常強調「邏輯思考」和「解決問題的能力」，能否舉一個具體的例子說明這在工作中是如何運作的？",
-            "11.作為菜鳥，我在會議中常常不敢發言或怕說錯話，我該如何克服這種恐懼並適時展現自己？",
-            "12.遇到不會的問題時，我很怕一直問會被嫌煩或覺得能力差，但不問又卡住，請問該如何拿捏「發問」的時機與技巧？",
-            "13.如果遇到觀念比較傳統的主管，或是溝通頻率對不上的前輩，我有什麼方法可以順暢地與他們合作？",
-            "14.職場上真的能交到朋友嗎？還是應該與同事保持「公事公辦」的距離比較安全？",
-            "15.如果我不小心得罪了同事，或是與團隊成員意見不合，當下我該如何圓場或化解尷尬？",
-            "16.對於第一份工作，您會建議先去制度完善的大公司歷練，還是去充滿挑戰與彈性的新創公司？",
+            "9.沒有相關實習經驗，大學生還能用什麼方式補強競爭力？",
+            "10.新鮮人最容易被忽略、但企業其實很在意的能力是什麼？",
+            "11.主動請教主管或同事，怎麼做才不會被覺得很打擾？",
+            "12.對於容易焦慮、怕做錯事的新人，有什麼實際建議？",
+            "13.如果工作內容跟想像落差很大，會建議怎麼調適？",
+            "14.職場上能交朋友嗎？還是公事公辦比較安全？",
+            "15.如果不小心得罪同事或意見不合，當下該怎麼化解？",
+            "16.第一份工作，該選制度完善的大公司還是具有挑戰的新創公司？",
             "17.如何快速觀察並融入當地的「企業文化」或「潛規則」？",
             "18.如果能回到剛畢業的那一年，您最想對當時準備踏入職場的自己說的一句話是什麼？",
-            "19.如何平衡工作表現與個人生活？",
+            "19.再來一次",
             "20.在試用期期間，企業最看重的是什麼？",
             "21.剛入職時常覺得自己什麼都不會，這種焦慮感該如何排解？",
             "22.在工作中犯了一個比較嚴重的錯誤，能做什麼來挽回？",
             "23.第一份工作建議至少要做多久？",
-            "24.新人應該先專注本業，還是可以利用下班時間發展副業？"
+            "24.新人應該先專注本業，還是可以利用下班時間發展副業？",
+            "25.在第一份工作中，您認為「硬實力」與「軟實力」哪一個比較重要？",
+            "26.如何平衡工作表現與個人生活？"
         ];
 
         // 亂碼字元庫
@@ -1038,7 +1157,8 @@
         function renderBossGrid() {
             const grid = document.getElementById('boss-grid');
             grid.innerHTML = '';
-            for (let i = 0; i < 24; i++) {
+            // 渲染 26 個問題格子
+            for (let i = 0; i < 26; i++) {
                 const block = document.createElement('button');
                 block.className = 'boss-grid-item';
                 block.innerText = i + 1;
@@ -1046,9 +1166,19 @@
                 block.onclick = (e) => openQuestion(e.target);
                 grid.appendChild(block);
             }
+            
+            // 新增第 27 個元素：結算寶箱 (修正為真正的圖片)
+            // 使用像素風格的寶箱圖片 URL
+            const chestUrl = "https://cdn-icons-png.flaticon.com/512/6121/6121517.png"; 
+
+            const settlementBtn = document.createElement('button');
+            settlementBtn.id = 'settlement-btn';
+            settlementBtn.className = 'boss-grid-item settlement-chest-container';
+            settlementBtn.innerHTML = `<img src="${chestUrl}" class="settlement-chest-img" alt="Chest">`;
+            settlementBtn.onclick = triggerFinalSettlement;
+            grid.appendChild(settlementBtn);
         }
 
-        // 修改：加入洗牌特效
         let shuffleInterval;
         function openQuestion(block) {
             if (block.classList.contains('cleared')) return;
@@ -1060,34 +1190,28 @@
             
             modal.classList.remove('hidden');
             
-            // 暫時禁用攻擊按鈕
             attackBtn.disabled = true;
             attackBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
             const targetIndex = parseInt(block.dataset.index);
             const finalQuestion = questions[targetIndex] || "ERROR: DATA NOT FOUND";
             
-            // 開始洗牌
             qText.classList.add('shuffling');
             let shuffleCount = 0;
-            const maxShuffles = 20; // 洗牌次數
+            const maxShuffles = 20; 
 
             clearInterval(shuffleInterval);
             shuffleInterval = setInterval(() => {
-                // 1. 隨機顯示一個問題 (模擬快速切換)
                 const randomQ = questions[Math.floor(Math.random() * questions.length)];
-                // 2. 或者顯示亂碼
-                // const randomStr = Array(20).fill(0).map(() => scrambleChars[Math.floor(Math.random() * scrambleChars.length)]).join('');
-                
                 qText.innerText = randomQ;
-                playShuffleSound(); // 播放短促音效
+                playShuffleSound(); 
 
                 shuffleCount++;
                 if (shuffleCount >= maxShuffles) {
                     clearInterval(shuffleInterval);
                     finalizeQuestion(finalQuestion);
                 }
-            }, 60); // 每 60ms 切換一次
+            }, 60); 
         }
 
         function finalizeQuestion(text) {
@@ -1096,18 +1220,14 @@
             
             qText.innerText = text;
             qText.classList.remove('shuffling');
-            
-            // 播放鎖定音效
             playBeep(1200, 'sine', 0.2); 
-            
-            // 啟用攻擊按鈕
             attackBtn.disabled = false;
             attackBtn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
         function closeQuestionModal() {
             document.getElementById('question-modal').classList.add('hidden');
-            clearInterval(shuffleInterval); // 確保關閉時停止洗牌
+            clearInterval(shuffleInterval); 
         }
 
         function triggerDamageEffect() {
@@ -1123,28 +1243,46 @@
         function submitAttack() {
             triggerDamageEffect();
             
-            bossHP--;
+            // 攻擊邏輯
+            if (bossHP > 0) bossHP--;
+            
             updateBossHPUI();
             
             if (currentTargetBlock) {
                 currentTargetBlock.classList.add('cleared');
                 currentTargetBlock.innerText = "";
+                clearedCount++;
+                checkUnlockSettlement();
             }
 
             closeQuestionModal();
+        }
 
-            if (bossHP <= 0) {
-                setTimeout(triggerVictory, 1000); 
+        function checkUnlockSettlement() {
+            if (clearedCount >= 26) {
+                const chest = document.getElementById('settlement-btn');
+                chest.classList.add('unlocked');
+                playBeep(2000, 'triangle', 0.5); // 解鎖音效
             }
+        }
+
+        function triggerFinalSettlement() {
+            const chest = document.getElementById('settlement-btn');
+            if (!chest.classList.contains('unlocked')) {
+                // 如果還沒解鎖
+                playBeep(100, 'sawtooth', 0.3);
+                return;
+            }
+            triggerVictory();
         }
 
         function updateBossHPUI() {
             const hpBar = document.getElementById('boss-hp-bar');
             const hpText = document.getElementById('boss-hp-text');
-            const percentage = (bossHP / 24) * 100;
+            const percentage = (bossHP / 26) * 100;
             
             hpBar.style.width = `${percentage}%`;
-            hpText.innerText = `${bossHP}/24`;
+            hpText.innerText = `${bossHP}/26`;
             
             bossStage.style.transform = "translate(5px, 5px)";
             setTimeout(() => bossStage.style.transform = "translate(0, 0)", 100);
@@ -1166,20 +1304,71 @@
             const duration = 5 * 1000;
             const animationEnd = Date.now() + duration;
             const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
-
             const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
             const interval = setInterval(function() {
                 const timeLeft = animationEnd - Date.now();
-
-                if (timeLeft <= 0) {
-                    return clearInterval(interval);
-                }
-
+                if (timeLeft <= 0) return clearInterval(interval);
                 const particleCount = 50 * (timeLeft / duration);
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
                 confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
             }, 250);
+        }
+
+        // --- 有獎徵答邏輯 ---
+        function openQuiz(boxId) {
+            let question, options, correctAnswer;
+
+            // 根據木箱 ID 設定題目
+            if (boxId === 1) {
+                question = "請問今年是第幾屆 CCP (職涯教練計畫)？";
+                options = { '13': '13屆', '14': '14屆', '15': '15屆', '16': '16屆' };
+                correctAnswer = '16';
+            } else if (boxId === 2) {
+                question = "請問目前在台上的主持人不包含哪一位？";
+                options = { 'A': '庭瑋', 'B': '芊瑜', 'C': '秉欣', 'D': '巧涵' };
+                correctAnswer = 'C'; 
+            } else if (boxId === 3) {
+                question = "請問參與 CCP 第16屆的企業總共有幾間？";
+                options = { '23': '23間', '24': '24間', '25': '25間', '26': '26間' };
+                // 根據您的網頁資料 companies 陣列長度是 24
+                correctAnswer = '24';
+            }
+
+            Swal.fire({
+                title: '有獎徵答挑戰！',
+                text: question,
+                input: 'radio',
+                inputOptions: options,
+                confirmButtonText: '提交答案',
+                cancelButtonText: '放棄',
+                showCancelButton: true,
+                background: '#fff',
+                customClass: {
+                    popup: 'pixel-font'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (result.value === correctAnswer) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: '答對了！',
+                            text: '獲得神祕獎勵！', // 移除 "(Boss 不會扣血)"
+                            confirmButtonText: '太棒了'
+                        });
+                        playBeep(880, 'triangle', 0.2);
+                        playBeep(1760, 'triangle', 0.4);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: '答錯囉...',
+                            text: '再試一次吧！',
+                            confirmButtonText: '好'
+                        });
+                        playBeep(150, 'sawtooth', 0.4);
+                    }
+                }
+            });
         }
 
         renderGrid();
