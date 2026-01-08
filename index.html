@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>第16屆職涯教練計畫 - 冒險啟程</title>
-    <!-- 引入 Tailwind CSS (使用最新 CDN 以支援更多彈性設定) -->
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- 引入 Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap" rel="stylesheet">
@@ -27,29 +27,18 @@
             font-family: 'DotGothic16', sans-serif; 
             color: #333;
             overflow-x: hidden;
-            /* 確保游標在整個頁面一致 */
             cursor: url('https://cur.cursors-4u.net/cursors/cur-10/cur964.cur'), auto;
         }
 
-        /* 彈性佈局優化：通用響應式設定 */
-        img, video {
-            max-width: 100%;
-            height: auto;
-        }
-
-        /* 讓所有可互動元素的游標也變成劍 */
-        a, button, .company-grid-item, .close-btn, .gacha-folder, .pixel-btn, .boss-grid-item, .wooden-chest {
+        /* 通用設定 */
+        img, video { max-width: 100%; height: auto; }
+        a, button, .company-grid-item, .close-btn, .gacha-folder, .pixel-btn, .boss-grid-item, .wooden-chest, .crystal-ball-btn, #image-modal {
             cursor: url('https://cur.cursors-4u.net/cursors/cur-10/cur964.cur'), pointer; 
         }
 
-        /* --- 全站通用的動態像素背景 --- */
+        /* --- 背景動畫 --- */
         #global-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; 
             background-color: var(--bg-dark);
             background-image: url('./image/background.png'); 
             background-size: 110% 110%; 
@@ -58,68 +47,30 @@
             animation: bg-pan 20s ease-in-out infinite alternate;
             transition: background-image 0.5s ease-in-out, filter 0.2s ease;
         }
-
-        /* BOSS 模式背景 */
-        #global-bg.boss-mode {
-            background-image: url('./image/boss.png'); 
-            filter: contrast(1.1) brightness(0.8);
-        }
-
-        /* 受傷閃爍背景 */
-        #global-bg.damage-mode {
-            filter: sepia(1) hue-rotate(-50deg) saturate(5) contrast(2);
-        }
-
+        #global-bg.boss-mode { background-image: url('./image/boss.png'); filter: contrast(1.1) brightness(0.8); }
+        #global-bg.damage-mode { filter: sepia(1) hue-rotate(-50deg) saturate(5) contrast(2); }
+        
         #global-bg::after {
-            content: "";
-            position: absolute;
-            inset: 0;
+            content: ""; position: absolute; inset: 0;
             background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.1) 51%);
-            background-size: 100% 4px;
-            animation: scanline-move 60s linear infinite;
-            pointer-events: none;
+            background-size: 100% 4px; animation: scanline-move 60s linear infinite; pointer-events: none;
         }
-
-        #global-bg::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle, transparent 50%, #000 95%);
-            z-index: 1;
-            pointer-events: none;
-        }
-
         @keyframes bg-pan { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
         @keyframes scanline-move { 0% { background-position: 0 0; } 100% { background-position: 0 1000px; } }
 
         .en-pixel { font-family: 'Press Start 2P', cursive; }
         h1, h2, h3, .pixel-font { font-family: 'DotGothic16', sans-serif; line-height: 1.5; }
 
-        .pixel-box {
-            background: white;
-            border: 4px solid black;
-            padding: 1rem;
-            box-shadow: 4px 4px 0px 0px rgba(0,0,0,1); 
-        }
-
-        .force-pixel { image-rendering: pixelated; }
-
+        .pixel-box { background: white; border: 4px solid black; padding: 1rem; box-shadow: 4px 4px 0px 0px rgba(0,0,0,1); }
         .rpg-dialogue {
-            background-color: var(--ui-blue);
-            color: white;
-            border: 4px solid white;
-            outline: 4px solid black;
-            padding: 15px;
-            position: relative;
-            box-shadow: 4px 4px 0 0 rgba(0,0,0,0.5);
+            background-color: var(--ui-blue); color: white; border: 4px solid white; outline: 4px solid black;
+            padding: 15px; position: relative; box-shadow: 4px 4px 0 0 rgba(0,0,0,0.5);
         }
         
         .pixel-btn {
-            background-color: var(--accent-color);
-            border: 4px solid black;
+            background-color: var(--accent-color); border: 4px solid black;
             font-family: 'Press Start 2P', 'DotGothic16', cursive; 
-            padding: 12px 24px;
-            text-transform: uppercase;
+            padding: 12px 24px; text-transform: uppercase;
             box-shadow: inset -4px -4px 0px 0px rgba(0,0,0,0.2), 4px 4px 0px 0px #000;
             transition: transform 0.1s, box-shadow 0.1s;
         }
@@ -127,41 +78,22 @@
         .pixel-btn:hover { background-color: #ffe066; }
 
         .company-grid-item {
-            background-color: #f0f0f0;
-            border: 4px solid #555;
-            transition: all 0.1s;
-            position: relative;
+            background-color: #f0f0f0; border: 4px solid #555; transition: all 0.1s; position: relative;
         }
         .company-grid-item:hover {
-            border-color: var(--accent-color);
-            transform: scale(1.05);
-            background-color: #fff;
-            box-shadow: 0 0 15px var(--accent-color);
-            z-index: 10;
+            border-color: var(--accent-color); transform: scale(1.05); background-color: #fff;
+            box-shadow: 0 0 15px var(--accent-color); z-index: 10;
         }
 
         .hidden-screen { display: none !important; }
 
-        /* 卡片進場彈出動畫 */
-        @keyframes popIn {
-            0% { transform: scale(0.8) translateY(20px); opacity: 0; }
-            100% { transform: scale(1) translateY(0); opacity: 1; }
-        }
-        .pop-in-animation {
-            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-
-        /* 呼吸動畫 */
-        @keyframes breathe-obj {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
-        }
-        .breathing-effect img, .breathing-effect video {
-            animation: breathe-obj 4s ease-in-out infinite;
-        }
-
-        /* 故障效果 */
+        /* 動畫類 */
+        @keyframes popIn { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+        .pop-in-animation { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        
+        @keyframes breathe-obj { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+        .breathing-effect img, .breathing-effect video { animation: breathe-obj 4s ease-in-out infinite; }
+        
         @keyframes glitch-anim {
             0% { clip-path: inset(0 0 0 0); transform: translate(0); }
             2% { clip-path: inset(10% 0 85% 0); transform: translate(-2px, 2px); }
@@ -169,15 +101,13 @@
             6% { clip-path: inset(0 0 0 0); transform: translate(0); }
             100% { clip-path: inset(0 0 0 0); transform: translate(0); }
         }
-        .glitch-effect:hover img, .glitch-effect:hover video {
-            animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite;
-        }
+        .glitch-effect:hover img, .glitch-effect:hover video { animation: glitch-anim 0.3s cubic-bezier(.25, .46, .45, .94) both infinite; }
 
         .stat-bar-fill { width: 0%; transition: width 1s ease-out; }
         .cursor-blink { animation: blink 1s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* Loading Screen */
+        /* Loading & Gacha */
         #loading-screen {
             position: fixed; inset: 0; background-color: #000; z-index: 9999;
             display: flex; flex-col: column; align-items: center; justify-content: center;
@@ -186,13 +116,10 @@
         .loading-bar-container { width: 80%; max-width: 400px; height: 30px; border: 4px solid white; padding: 4px; margin-top: 20px; }
         .loading-bar-fill { height: 100%; background-color: var(--accent-color); width: 0%; transition: width 0.1s linear; }
 
-        /* --- 抽卡系統樣式 --- */
         #gacha-screen {
-            position: fixed; inset: 0; z-index: 60;
-            background-color: rgba(0, 0, 0, 0.9);
+            position: fixed; inset: 0; z-index: 60; background-color: rgba(0, 0, 0, 0.9);
             display: flex; align-items: center; justify-content: center; flex-direction: column;
         }
-
         .gacha-folder {
             width: 160px; height: 120px; background-color: #fb923c; border: 8px solid #000;
             position: relative; box-shadow: 10px 10px 0 #000; cursor: pointer;
@@ -206,10 +133,8 @@
             font-family: 'Press Start 2P'; font-size: 12px; color: black; background: rgba(255,255,255,0.8);
             padding: 4px; border: 2px solid black; text-align: center;
         }
-        
         .gacha-idle { animation: float-folder 3s ease-in-out infinite; }
         @keyframes float-folder { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-
         .gacha-shake { animation: shake-hard 0.5s linear infinite; }
         @keyframes shake-hard {
             0% { transform: translate(2px, 2px) rotate(0deg); }
@@ -218,212 +143,147 @@
             75% { transform: translate(-2px, 2px) rotate(-5deg); }
             100% { transform: translate(2px, -2px) rotate(0deg); }
         }
-
         .gacha-flash { animation: flash-white 0.5s forwards; }
-        @keyframes flash-white {
-            0% { background-color: rgba(0,0,0,0.85); }
-            50% { background-color: white; }
-            100% { background-color: rgba(0,0,0,0.85); opacity: 0; }
-        }
+        @keyframes flash-white { 0% { background-color: rgba(0,0,0,0.85); } 50% { background-color: white; } 100% { background-color: rgba(0,0,0,0.85); opacity: 0; } }
 
-        /* --- 發光展示 (Shiny Reveal) --- */
-        #gacha-reveal {
-            position: fixed; inset: 0; z-index: 55;
-            display: flex; align-items: center; justify-content: center;
-            pointer-events: none;
-        }
-        
+        #gacha-reveal { position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center; pointer-events: none; }
         .sunburst {
             position: absolute; width: 200vmax; height: 200vmax;
             background: repeating-conic-gradient(from 0deg, #f7d51d 0deg 20deg, #ffed4a 20deg 40deg);
-            animation: spin 10s linear infinite;
-            opacity: 0; transition: opacity 0.5s;
+            animation: spin 10s linear infinite; opacity: 0; transition: opacity 0.5s;
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* 修正：教練抽卡尺寸自適應 2:3 */
         .reveal-img-container {
-            width: 70vw; /* 手機版寬度 */
-            max-width: 400px; /* 最大寬度 */
-            aspect-ratio: 2/3; /* 強制 2:3 比例 */
-            height: auto; /* 高度自動 */
-            z-index: 10;
-            transform: scale(0); opacity: 0;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 8px solid white; box-shadow: 0 0 50px rgba(255, 255, 255, 0.8);
-            background: white; 
+            width: 70vw; max-width: 400px; aspect-ratio: 2/3; height: auto; z-index: 10;
+            transform: scale(0); opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 8px solid white; box-shadow: 0 0 50px rgba(255, 255, 255, 0.8); background: white; 
         }
-
-        .auto-remove-bg {
-            mix-blend-mode: multiply; 
-            filter: contrast(1.1) brightness(1.05);
-        }
-
-        img { image-rendering: auto; }
+        .auto-remove-bg { mix-blend-mode: multiply; filter: contrast(1.1) brightness(1.05); }
         .force-pixel { image-rendering: pixelated; }
 
-        ::-webkit-scrollbar { width: 12px; }
-        ::-webkit-scrollbar-track { background: #202028; }
-        ::-webkit-scrollbar-thumb { background: #f7d51d; border: 2px solid #000; }
-
-        /* --- BOSS Stage 專用樣式 --- */
+        /* --- BOSS Stage --- */
         #boss-stage {
-            border-top: 8px solid #000;
-            background-color: rgba(0, 0, 0, 0.6); 
-            position: relative;
-            min-height: 80vh; 
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            border-top: 8px solid #000; background-color: rgba(0, 0, 0, 0.6); position: relative;
+            min-height: 80vh; display: flex; flex-direction: column; justify-content: center;
         }
         
-        /* 彈性佈局修正：Boss Grid 網格 */
         .boss-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 手機版 4 欄 */
+            grid-template-columns: repeat(6, 1fr);
             gap: 8px;
+            max-width: 900px;
+            margin: 0 auto;
         }
-        @media (min-width: 640px) {
-            .boss-grid {
-                grid-template-columns: repeat(5, 1fr); /* 平板 5 欄 */
-                gap: 12px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .boss-grid {
-                grid-template-columns: repeat(6, 1fr); /* 桌機 6 欄 */
-                gap: 16px;
-            }
-        }
-
+        
         .boss-grid-item {
             aspect-ratio: 1;
             background-color: #333;
-            border: 4px solid #555;
+            border: 3px solid #555;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: clamp(16px, 2vw, 24px); /* 彈性文字 */
+            font-size: clamp(12px, 1.5vw, 20px); 
             color: #fff;
             position: relative;
             overflow: hidden;
             transition: transform 0.1s;
         }
-        .boss-grid-item:hover {
-            transform: scale(1.05);
-            border-color: var(--boss-red);
-            z-index: 5;
-        }
-        .boss-grid-item.cleared {
-            background-color: #222;
-            border-color: #000;
-            pointer-events: none;
-            opacity: 0.5;
-        }
+        .boss-grid-item:hover { transform: scale(1.05); border-color: var(--boss-red); z-index: 5; }
+        .boss-grid-item.cleared { background-color: #222; border-color: #000; pointer-events: none; opacity: 0.5; }
         .boss-grid-item.cleared::after {
-            content: "❌";
-            font-size: clamp(30px, 4vw, 48px);
-            position: absolute;
-            color: var(--boss-red);
-            text-shadow: 2px 2px 0 #000;
+            content: "❌"; font-size: clamp(24px, 3vw, 40px); position: absolute;
+            color: var(--boss-red); text-shadow: 2px 2px 0 #000;
         }
 
-        /* 結算寶箱樣式 (新) */
-        .settlement-chest-container {
-            background-color: transparent !important;
-            border: none !important;
-            cursor: not-allowed;
-            position: relative;
-        }
-        .settlement-chest-img {
-            width: 80%;
-            height: 80%;
-            object-fit: contain;
-            filter: grayscale(1) brightness(0.5); /* 未解鎖時黑白 */
-            transition: all 0.5s ease;
-        }
-        .settlement-chest-container.unlocked {
-            cursor: pointer;
-        }
-        .settlement-chest-container.unlocked .settlement-chest-img {
-            filter: grayscale(0) brightness(1); /* 解鎖後彩色 */
-            animation: bounce-chest 2s infinite;
-        }
-        @keyframes bounce-chest {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
+        /* 結算寶箱 */
+        .settlement-chest-container { background-color: transparent !important; border: none !important; cursor: not-allowed; position: relative; }
+        .settlement-chest-img { width: 80%; height: 80%; object-fit: contain; filter: grayscale(1) brightness(0.5); transition: all 0.5s ease; }
+        .settlement-chest-container.unlocked { cursor: pointer; }
+        .settlement-chest-container.unlocked .settlement-chest-img { filter: grayscale(0) brightness(1); animation: bounce-chest 2s infinite; }
+        @keyframes bounce-chest { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
-        /* Boss HP Bar */
+        /* Boss HP */
         .boss-hp-container {
-            width: 100%;
-            height: 40px;
-            background: #333;
-            border: 4px solid white;
-            position: relative;
-            margin-bottom: 20px;
+            width: 100%; height: 40px; background: #333; border: 4px solid white; position: relative; margin-bottom: 20px;
         }
         .boss-hp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff0000, #ff6600);
-            width: 100%;
-            transition: width 0.3s ease-out;
-            position: relative;
+            height: 100%; background: linear-gradient(90deg, #ff0000, #ff6600); width: 100%;
+            transition: width 0.3s ease-out; position: relative;
         }
         .boss-hp-fill::after {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
+            content: ""; position: absolute; inset: 0;
             background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent);
             background-size: 20px 20px;
         }
 
-        /* 有獎徵答木箱區 */
-        .quiz-section {
-            margin-top: 40px;
-            padding: 20px;
-            border-top: 4px dashed white;
-            text-align: center;
-        }
+        /* Bonus Quiz */
+        .quiz-section { margin-top: 40px; padding: 20px; border-top: 4px dashed white; text-align: center; }
         .wooden-chest {
-            background-color: var(--chest-brown);
-            border: 4px solid #5c2e0a;
-            color: white;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            box-shadow: 4px 4px 0 #000;
-            transition: transform 0.1s;
+            background-color: var(--chest-brown); border: 4px solid #5c2e0a; color: white;
+            width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;
+            font-size: 32px; box-shadow: 4px 4px 0 #000; transition: transform 0.1s;
         }
-        .wooden-chest:hover {
-            transform: translateY(-5px);
-            background-color: #a0522d;
-        }
-        .wooden-chest:active {
-            transform: translateY(0);
-        }
+        .wooden-chest:hover { transform: translateY(-5px); background-color: #a0522d; }
+        .wooden-chest:active { transform: translateY(0); }
 
         /* Question Modal */
-        #question-modal {
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(5px);
-        }
+        #question-modal { background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); }
         .question-box {
-            background: var(--ui-blue);
-            border: 6px solid white;
-            outline: 6px solid black;
-            padding: 24px;
-            max-width: 600px;
-            width: 90%;
-            box-shadow: 10px 10px 0 0 rgba(0,0,0,0.5);
-            text-align: center;
-            color: white;
+            background: var(--ui-blue); border: 6px solid white; outline: 6px solid black;
+            padding: 24px; max-width: 600px; width: 90%; box-shadow: 10px 10px 0 0 rgba(0,0,0,0.5);
+            text-align: center; color: white;
         }
 
-        /* Text Glitch Effect for Shuffle */
+        /* 水晶球按鈕特效 (已更新 Icon) */
+        .crystal-ball-btn {
+            display: inline-block; width: 56px; height: 56px; margin-left: 10px; vertical-align: middle;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath fill='%234a4a4a' d='M24 56h16v4H24z'/%3E%3Cpath fill='%23666' d='M20 52h24v4H20z'/%3E%3Ccircle cx='32' cy='28' r='24' fill='%234fd1c5'/%3E%3Ccircle cx='32' cy='28' r='20' fill='%2381e6d9'/%3E%3Cpath fill='%23fff' opacity='.4' d='M20 16a12 12 0 0 1 12-12 12 12 0 0 1 12 12'/%3E%3Cpath fill='%232c7a7b' d='M16 36a16 16 0 0 0 32 0h-4a12 12 0 0 1-24 0z' opacity='.3'/%3E%3C/svg%3E") no-repeat center/contain;
+            transition: transform 0.2s; filter: drop-shadow(2px 2px 0px #000);
+            image-rendering: pixelated;
+        }
+        .crystal-ball-btn:hover { transform: scale(1.1) rotate(5deg); filter: drop-shadow(0 0 8px #4fd1c5); }
+
+        /* Youtube Modal (修正版) */
+        #youtube-modal {
+            position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.9);
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* 影片容器 - 預設 16:9 */
+        .video-wrapper {
+            position: relative; 
+            width: 80vw; max-width: 900px; 
+            aspect-ratio: 16/9;
+            border: 4px solid white; box-shadow: 0 0 20px rgba(255,255,255,0.5); background: black;
+            transition: all 0.3s ease;
+        }
+
+        /* 影片容器 - 短影音 Shorts 模式 (9:16) */
+        .video-wrapper.shorts-mode {
+            width: auto;
+            height: 80vh; /* 高度優先 */
+            aspect-ratio: 9/16;
+            max-width: 90vw;
+        }
+
+        /* 魔法開啟動畫 */
+        @keyframes magic-pop {
+            0% { transform: scale(0) rotate(-180deg); opacity: 0; filter: brightness(2); }
+            60% { transform: scale(1.1) rotate(10deg); opacity: 1; filter: brightness(1.5); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; filter: brightness(1); }
+        }
+        
+        .magic-open-anim {
+            animation: magic-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* 企業提示樣式 */
+        .mission-hint-box {
+            background-color: rgba(0,0,0,0.3); border: 2px dashed #ffff00; padding: 10px;
+            margin-top: 15px; margin-bottom: 15px; border-radius: 4px; display: none;
+        }
+        .mission-hint-text { color: #ffff00; font-family: 'DotGothic16', sans-serif; font-size: 1.2rem; }
+
         @keyframes text-glitch {
             0% { transform: translate(0, 0); opacity: 1; }
             20% { transform: translate(-2px, 2px); opacity: 0.8; }
@@ -432,60 +292,26 @@
             80% { transform: translate(1px, -1px); opacity: 1; }
             100% { transform: translate(0, 0); opacity: 1; }
         }
-        .shuffling {
-            animation: text-glitch 0.1s infinite;
-            color: #ffff00; /* Yellow while shuffling */
-        }
+        .shuffling { animation: text-glitch 0.1s infinite; color: #ffff00; }
 
         /* Victory Screen */
-        #victory-screen {
-            background: linear-gradient(to bottom, #000046, #1cb5e0);
-            z-index: 1000;
-        }
-        .victory-text {
-            font-family: 'Press Start 2P', cursive;
-            color: #f7d51d;
-            text-shadow: 4px 4px 0 #000;
-            animation: bounce 2s infinite;
-        }
+        #victory-screen { background: linear-gradient(to bottom, #000046, #1cb5e0); z-index: 1000; }
+        .victory-text { font-family: 'Press Start 2P', cursive; color: #f7d51d; text-shadow: 4px 4px 0 #000; animation: bounce 2s infinite; }
         @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-30px);} 60% {transform: translateY(-15px);} }
 
-        /* SweetAlert Customization for Pixel Theme */
-        .swal2-popup {
-            font-family: 'DotGothic16', sans-serif !important;
-            border: 4px solid black !important;
-            border-radius: 0 !important;
-            box-shadow: 8px 8px 0 rgba(0,0,0,0.5) !important;
-        }
-        .swal2-title {
-            font-family: 'DotGothic16', sans-serif !important;
-        }
-        .swal2-confirm, .swal2-deny, .swal2-cancel {
-            border: 2px solid black !important;
-            border-radius: 0 !important;
-            box-shadow: 4px 4px 0 rgba(0,0,0,0.2) !important;
-        }
-
-        /* Detail Screen Scrollbar */
-        .custom-scroll::-webkit-scrollbar {
-            width: 8px;
-        }
-        .custom-scroll::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-        }
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: #888; 
-            border-radius: 4px;
-        }
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: #555; 
-        }
+        .custom-scroll::-webkit-scrollbar { width: 8px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        .swal2-popup { font-family: 'DotGothic16', sans-serif !important; border: 4px solid black !important; border-radius: 0 !important; box-shadow: 8px 8px 0 rgba(0,0,0,0.5) !important; }
+        .swal2-title { font-family: 'DotGothic16', sans-serif !important; }
+        .swal2-confirm, .swal2-deny, .swal2-cancel { border: 2px solid black !important; border-radius: 0 !important; box-shadow: 4px 4px 0 rgba(0,0,0,0.2) !important; }
 
     </style>
 </head>
 <body class="min-h-screen text-gray-900 selection:bg-yellow-400 selection:text-black">
 
-    <!-- 全站通用動態背景 -->
     <div id="global-bg"></div>
 
     <!-- 0. Loading Screen -->
@@ -512,14 +338,19 @@
         </div>
     </section>
 
-    <!-- BGM 控制按鈕 -->
+    <!-- BGM & SFX 控制按鈕 -->
     <div class="fixed bottom-4 left-4 z-50 hidden flex flex-col gap-2" id="bgm-control">
         <button onclick="toggleFullScreen()" class="bg-gray-900 text-white border-2 border-white px-4 py-2 text-sm md:text-base en-pixel hover:bg-gray-700 shadow-md flex items-center gap-2 trigger-sound">
             <span>⛶</span> FULLSCREEN
         </button>
-        <button onclick="toggleBGM()" class="bg-gray-900 text-white border-2 border-white px-4 py-2 text-sm md:text-base en-pixel hover:bg-gray-700 shadow-md flex items-center gap-2 trigger-sound">
-            <span>🎵</span> <span id="bgm-status">BGM: OFF</span>
-        </button>
+        <div class="flex gap-2">
+            <button onclick="toggleBGM()" class="bg-gray-900 text-white border-2 border-white px-4 py-2 text-sm md:text-base en-pixel hover:bg-gray-700 shadow-md flex items-center gap-2 trigger-sound">
+                <span>🎵</span> <span id="bgm-status">BGM: OFF</span>
+            </button>
+            <button onclick="toggleSFX()" class="bg-gray-900 text-white border-2 border-white px-4 py-2 text-sm md:text-base en-pixel hover:bg-gray-700 shadow-md flex items-center gap-2 trigger-sound">
+                <span id="sfx-icon">🔊</span> <span id="sfx-status">SFX: ON</span>
+            </button>
+        </div>
     </div>
 
     <!-- 2. Main Map -->
@@ -539,7 +370,6 @@
             </div>
         </header>
 
-        <!-- 彈性佈局修正：網格系統 -->
         <div id="grid-container" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 pb-24">
             <!-- Grid Content -->
         </div>
@@ -559,7 +389,6 @@
                 </div>
             </div>
 
-            <!-- 修正：Grid System for Boss (支援26格) -->
             <div class="max-w-5xl mx-auto w-full">
                 <div id="boss-grid" class="boss-grid">
                     <!-- Boss Grid Items Generated by JS -->
@@ -570,7 +399,6 @@
                 <p>將 26 個問題全部擊破後，點擊「結算」寶箱即可通關！</p>
             </div>
 
-            <!-- 有獎徵答區 -->
             <div class="quiz-section">
                 <h3 class="text-yellow-300 text-2xl mb-6 pixel-font">🎁 有獎徵答 Bonus Stage</h3>
                 <div class="flex justify-center gap-8 flex-wrap">
@@ -579,18 +407,22 @@
                     <button class="wooden-chest" onclick="openQuiz(3)">?</button>
                 </div>
             </div>
-
         </section>
-
     </section>
 
     <!-- Question Modal -->
     <div id="question-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4">
         <div class="question-box pop-in-animation">
             <h3 class="text-2xl md:text-3xl text-yellow-300 mb-6 pixel-font">MISSION</h3>
-            <div class="min-h-[100px] flex items-center justify-center">
-                <p id="q-text" class="text-xl md:text-2xl leading-relaxed mb-8 pixel-font text-left w-full break-words">...</p>
+            
+            <div class="min-h-[80px] flex items-center justify-center">
+                <p id="q-text" class="text-xl md:text-2xl leading-relaxed mb-4 pixel-font text-left w-full break-words">...</p>
             </div>
+
+            <div id="mission-hint-box" class="mission-hint-box">
+                <p id="mission-hint-text" class="mission-hint-text"></p>
+            </div>
+
             <div class="flex flex-col gap-4">
                 <button id="attack-btn" onclick="submitAttack()" class="pixel-btn w-full text-xl md:text-2xl trigger-sound bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed">
                     ⚔️ ATTACK
@@ -598,6 +430,20 @@
             </div>
             <button onclick="closeQuestionModal()" class="mt-6 text-sm underline text-gray-300 hover:text-white">暫時撤退 (CLOSE)</button>
         </div>
+    </div>
+
+    <!-- YouTube Video Modal (Crystal Ball) -->
+    <div id="youtube-modal" class="hidden-screen">
+        <div id="video-container" class="video-wrapper">
+            <button onclick="closeYoutube()" class="absolute -top-10 right-0 text-white text-2xl en-pixel hover:text-red-500">CLOSE [X]</button>
+            <iframe id="yt-iframe" class="w-full h-full" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- 裕隆日產圖片燈箱 Modal -->
+    <div id="image-modal" class="hidden-screen fixed inset-0 z-[100] bg-black/90 flex items-center justify-center cursor-pointer" onclick="closeImageModal()">
+        <img id="modal-img" src="" class="max-w-[90vw] max-h-[90vh] border-4 border-white shadow-[0_0_20px_rgba(255,255,255,0.5)] object-contain transition-transform transform hover:scale-105">
+        <p class="absolute bottom-10 text-white text-xl en-pixel blink bg-black px-2">CLICK ANYWHERE TO RETREAT</p>
     </div>
 
     <!-- Victory Screen -->
@@ -621,24 +467,17 @@
         </div>
     </section>
 
-    <!-- 3. Detail Screen (Layout Optimized) -->
+    <!-- 3. Detail Screen -->
     <section id="detail-screen" class="hidden-screen fixed inset-0 z-40 bg-black/70 flex items-center justify-center p-2 md:p-4">
-        
-        <!-- Inner Container with Max Height and Flex Layout -->
         <div class="pop-in-animation bg-[#f0f0f0] border-8 border-white outline outline-4 outline-black w-full max-w-7xl max-h-[98vh] md:max-h-[95vh] relative shadow-[20px_20px_0_0_rgba(0,0,0,0.6)] z-50 flex flex-col overflow-hidden">
-            
-            <!-- Window Controls Decoration -->
             <div class="absolute top-3 right-16 md:right-20 flex gap-2 z-10">
                 <div class="w-3 h-3 md:w-4 md:h-4 bg-red-500 rounded-full border-2 border-black"></div>
                 <div class="w-3 h-3 md:w-4 md:h-4 bg-yellow-500 rounded-full border-2 border-black"></div>
                 <div class="w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-black"></div>
             </div>
 
-            <!-- Scrollable Content Area -->
             <div class="overflow-y-auto custom-scroll flex-1 p-4 md:p-8">
                 <div class="flex flex-col md:flex-row gap-6 md:gap-10 min-h-full">
-                    
-                    <!-- Left Column: Image & Stats (Fixed width on desktop if possible) -->
                     <div class="w-full md:w-5/12 lg:w-4/12 flex flex-col items-center flex-shrink-0">
                         <div class="bg-gray-800 p-2 border-4 border-black w-full max-w-[300px] md:max-w-none shadow-[6px_6px_0_0_rgba(0,0,0,0.3)] mx-auto">
                             <div class="w-full aspect-[2/3] bg-gray-700 border-2 border-gray-600 relative overflow-hidden glitch-effect breathing-effect group cursor-pointer">
@@ -679,9 +518,7 @@
                         </div>
                     </div>
 
-                    <!-- Right Column: Info -->
                     <div class="w-full md:w-7/12 lg:w-8/12 flex flex-col min-h-0">
-                        <!-- Header Info -->
                         <div class="flex items-center gap-3 mb-4 border-b-4 border-black pb-2 flex-shrink-0">
                             <div class="w-10 h-10 md:w-12 md:h-12 bg-yellow-400 border-4 border-black flex items-center justify-center text-2xl">📂</div>
                             <div class="overflow-hidden">
@@ -690,7 +527,6 @@
                             </div>
                         </div>
 
-                        <!-- Mentor Says Box -->
                         <div class="mb-4 flex-shrink-0">
                             <div class="rpg-dialogue !bg-blue-800 !border-white p-4">
                                 <p class="text-yellow-300 text-xs md:text-sm mb-1 en-pixel flex items-center gap-2">
@@ -702,12 +538,10 @@
                             </div>
                         </div>
 
-                        <!-- Flexible Description Box -->
                         <div class="bg-white p-4 border-4 border-dashed border-gray-400 relative shadow-sm flex-1 overflow-y-auto custom-scroll min-h-[150px]">
                             <p id="detail-desc" class="text-gray-900 text-base md:text-lg leading-relaxed text-justify whitespace-pre-line font-medium"></p>
                         </div>
 
-                        <!-- Bottom Controls -->
                         <div class="flex flex-col md:flex-row justify-between items-center gap-4 mt-4 pt-4 border-t-4 border-black flex-shrink-0">
                             <div class="flex items-center gap-3 w-full md:w-auto">
                                 <div class="w-10 h-10 md:w-12 md:h-12 bg-gray-300 border-2 border-black rounded-full overflow-hidden flex-shrink-0">
@@ -715,7 +549,11 @@
                                 </div>
                                 <div>
                                     <p class="text-[10px] md:text-xs text-gray-500 font-bold en-pixel">ASSIGNED MENTOR</p>
-                                    <p id="detail-coach" class="font-bold text-base md:text-xl text-black"></p>
+                                    <div class="flex items-center">
+                                        <p id="detail-coach" class="font-bold text-base md:text-xl text-black"></p>
+                                        <!-- 水晶球將插入此處 -->
+                                        <div id="crystal-ball-container"></div> 
+                                    </div>
                                 </div>
                             </div>
                             
@@ -730,7 +568,7 @@
     </section>
 
     <script>
-        // --- 1. 資料設定區 (維持 24 家企業) ---
+        // --- 1. 資料設定區 (已更新連結) ---
         const companies = [
             { id: 1, name: "台灣積體電路製造(股)有限公司", shortName: "台積電 TSMC", coach: "資深經理", logo: "https://static.wixstatic.com/media/79893c_ea4516cec7a04affba07536f131c15c8%7Emv2_d_2248_1499_s_2.jpg/v1/fit/w_1000%2Ch_1000%2Cal_c%2Cq_80/file.png", coachImage: "./coach/01.png", desc: "【部門】人力資源業務夥伴處營運組織\n【地點】台南\n\n【企業介紹】台積公司成立於1987年，率先開創了專業積體電路製造服務之商業模式，自此成為世界領先的專業積體電路製造服務公司。台積公司以領先業界的製程技術及設計解決方案組合支援其全球客戶及夥伴生態系統的蓬勃發展，釋放全球半導體產業的創新。", quote: "An investment in knowledge always pays the best interest.", stats: { professional: 98, leadership: 90, passion: 85 } },
             { id: 2, name: "中國信託商業銀行(股)有限公司", shortName: "中國信託", coach: "協理", logo: "https://osaas.commerce.nccu.edu.tw/uploads/media/14933719804.png", coachImage: "./coach/02.png", desc: "【部門】企業金融處\n【地點】台南/高雄\n\n【企業介紹】中國信託商銀成立於1966年。營業項目包括存款、放款、保證、外匯、國際金融業務分行(OBU)、信託、信用卡、現金卡、證券、債券、衍生性金融產品等。致力於提供國際化的金融服務，是台灣最國際化的銀行之一。", quote: "堅持理想，正面思考，努力會得到代價。", stats: { professional: 92, leadership: 95, passion: 90 } },
@@ -742,15 +580,35 @@
             { id: 8, name: "信義房屋股份有限公司", shortName: "信義房屋", coach: "協理", logo: "https://tse4.mm.bing.net/th/id/OIP.19-3ZoZrnkCdXE4Y-8p41gHaD0?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/08.png", desc: "【部門】仲介營運三處\n【地點】台南\n\n【企業介紹】信義房屋成立於1981年，堅持「信義立業，止於至善」的經營理念。首創「不動產說明書」，推動房屋交易透明化。致力於成為居住生活服務第一品牌，並積極投入ESG與社區營造，實踐「先義後利」的企業精神。", quote: "別相信運氣，要相信做了什麼努力產出好運氣。", stats: { professional: 91, leadership: 94, passion: 97 } },
             { id: 9, name: "資誠聯合會計師事務所", shortName: "資誠 PwC", coach: "副總/執業會計師", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/PricewaterhouseCoopers_Logo.svg", coachImage: "./coach/09.png", desc: "【部門】審計\n【地點】台南/台北\n\n【企業介紹】資誠(PwC Taiwan)係由朱國璋及陳振銑會計師於1970年創立，為PwC全球聯盟成員。提供審計、稅務、投資理財、價值管理、人力資源等整合性專業服務。運用全球資源，協助客戶精準掌握經濟產業趨勢，提升企業價值。", quote: "持續抱持更多好奇心，豐富生活體驗，樂於分享，打磨自身品牌和價值，創造更多選擇優勢。", stats: { professional: 99, leadership: 85, passion: 88 } },
             { id: 10, name: "華泰電子股份有限公司", shortName: "華泰電子 OSE", coach: "經理", logo: "https://sorting-house.com.tw/wp-content/uploads/2016/09/005-1.jpg", coachImage: "./coach/10.png", desc: "【部門】人力資源\n【地點】高雄\n\n【企業介紹】華泰電子專注於記憶體產品，為台灣第一家完全台資的IC封裝代工廠，深獲肯定。自1971年成立以來，透過製程創新與核心優勢，提供積體電路封裝與測試製造服務(IC Packaging & Testing)及專業電子代工製造服務(EMS)。", quote: "If you do what you’ve always done, you’ll get what you’ve always got.", stats: { professional: 89, leadership: 88, passion: 90 } },
-            { id: 11, name: "裕隆日產", shortName: "裕隆日產", coach: "經理", logo: "./image/11.png", coachImage: "./coach/11.png", desc: "【部門】總管理處 人力資源部\n【地點】新北\n\n【企業介紹】裕隆日產汽車積極創造符合區域風格的優勢車種，並將台灣汽車設計實力推向全球市場。揭櫫「追求顧客滿意、創造企業繁榮、貢獻社會福祉」三大經營理念。在設計、研發、行銷、服務等方面，皆以提高顧客滿意為最終目標。", quote: "意願是行動的起點，堅持是執行的終點。", stats: { professional: 92, leadership: 90, passion: 93 } },
+            
+            // 裕隆 (使用圖片)
+            { id: 11, name: "裕隆日產", shortName: "裕隆日產", coach: "經理", logo: "./image/11.png", coachImage: "./coach/11.png", 
+              videoUrl: "", // 裕隆特殊邏輯：圖片
+              desc: "【部門】總管理處 人力資源部\n【地點】新北\n\n【企業介紹】裕隆日產汽車積極創造符合區域風格的優勢車種，並將台灣汽車設計實力推向全球市場。揭櫫「追求顧客滿意、創造企業繁榮、貢獻社會福祉」三大經營理念。在設計、研發、行銷、服務等方面，皆以提高顧客滿意為最終目標。", quote: "意願是行動的起點，堅持是執行的終點。", stats: { professional: 92, leadership: 90, passion: 93 } },
+            
             { id: 12, name: "台灣國際航電(Garmin)", shortName: "Garmin", coach: "資深協理", logo: "https://campustalent.careercenter.ncu.edu.tw/storage/company_logo/23527104_logo.png", coachImage: "./coach/12.png", desc: "【部門】總管理處 人力資源部\n【地點】桃園/台南\n\n【企業介紹】Garmin是全球衛星定位系統(GPS)產業的龍頭。自1989年成立以來，在航空、航海、戶外健身、汽車導航等領域全球市佔第一。秉持「創新研發、豐富大家生活」的精神，以產品幫助許多人完成不同領域的旅程記憶。", quote: "期待在CCP計畫和大家一起Beat Yesterday. ", stats: { professional: 96, leadership: 92, passion: 95 } },
-            { id: 13, name: "永豐商業銀行股份有限公司", shortName: "永豐銀行", coach: "副處長", logo: "https://bank.sinopac.com/sinopacBT/webevents/1808_salarybuild/images/sinopac_logo_m.jpg", coachImage: "./coach/13.png", desc: "【部門】數位金融處\n【地點】台北\n\n【企業介紹】永豐銀行為永豐金控全資子公司，以綿密的營業網絡、高度創新的商品組合，為客戶提供最佳金融服務。業務範圍含法人金融、個人金融、財富管理等。展望國際，持續創新，致力於「翻轉金融，共創美好生活」。", quote: "你經歷的每一件事，都在為你的未來鋪路。", stats: { professional: 93, leadership: 89, passion: 94 } },
+            
+            // 永豐 (影片 - 更新為 Short)
+            { id: 13, name: "永豐商業銀行股份有限公司", shortName: "永豐銀行", coach: "副處長", logo: "https://bank.sinopac.com/sinopacBT/webevents/1808_salarybuild/images/sinopac_logo_m.jpg", coachImage: "./coach/13.png", 
+              videoUrl: "https://youtube.com/shorts/3o53JwJ7iG8?feature=share", // 更新：Shorts 連結
+              desc: "【部門】數位金融處\n【地點】台北\n\n【企業介紹】永豐銀行為永豐金控全資子公司，以綿密的營業網絡、高度創新的商品組合，為客戶提供最佳金融服務。業務範圍含法人金融、個人金融、財富管理等。展望國際，持續創新，致力於「翻轉金融，共創美好生活」。", quote: "你經歷的每一件事，都在為你的未來鋪路。", stats: { professional: 93, leadership: 89, passion: 94 } },
+            
             { id: 14, name: "新加坡商鈦坦科技", shortName: "鈦坦科技", coach: "部門主管", logo: "https://tse2.mm.bing.net/th/id/OIP.6b9AFHqwYn7lYvNcF6yPKwHaC2?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/14.png", desc: "【部門】開發部門\n【地點】高雄\n\n【企業介紹】鈦坦科技是一間總部位於新加坡的軟體開發公司，專注於線上軟體平台客製開發與維護。採用敏捷開發(Agile)模式，重視透明度與開放性。秉持「超越自我 Never Stop Improving」的理念，提供靈活應變的產品解決方案。", quote: "透過持續學習不斷成長，以終為始地在現實中探索並勇於嘗試各種可能性。", stats: { professional: 95, leadership: 95, passion: 100 } },
-            { id: 15, name: "美商英特格有限公司台灣分公司", shortName: "英特格 Entegris", coach: "資深經理", logo: "https://mms.businesswire.com/media/20230510005102/zh-HK/804442/5/ENTG-logo-Businesswire.jpg?download=1", coachImage: "./coach/15.png", desc: "【部門】人力資源部門\n【地點】高雄\n\n【企業介紹】Entegris是半導體與其他高科技產業的特用化學品與先進材料解決方案領導供應商。核心競爭力展現於材料科學、微污染控制、高階材料及卓越製造。協助客戶提升良率、降低成本，為先進製程提供關鍵支援。", quote: "求職像是一場旅行，過程中可能會迷惘、不安、自我懷疑，你準備好了嗎？路遙遠需要超前佈署，T姊陪你走一段，Don't Worry！", stats: { professional: 94, leadership: 88, passion: 90 } },
+            
+            // 英特格 (影片 - 更新)
+            { id: 15, name: "美商英特格有限公司台灣分公司", shortName: "英特格 Entegris", coach: "資深經理", logo: "https://mms.businesswire.com/media/20230510005102/zh-HK/804442/5/ENTG-logo-Businesswire.jpg?download=1", coachImage: "./coach/15.png", 
+              videoUrl: "https://youtu.be/KdVdpVtXPK8", // 更新
+              desc: "【部門】人力資源部門\n【地點】高雄\n\n【企業介紹】Entegris是半導體與其他高科技產業的特用化學品與先進材料解決方案領導供應商。核心競爭力展現於材料科學、微污染控制、高階材料及卓越製造。協助客戶提升良率、降低成本，為先進製程提供關鍵支援。", quote: "求職像是一場旅行，過程中可能會迷惘、不安、自我懷疑，你準備好了嗎？路遙遠需要超前佈署，T姊陪你走一段，Don't Worry！", stats: { professional: 94, leadership: 88, passion: 90 } },
+            
             { id: 16, name: "美商科林研發股份有限公司", shortName: "科林研發 Lam", coach: "資深營運處長", logo: "https://www.tsia.org.tw/api/GetDownloadMemberInfoLogoJpg?id=11", coachImage: "./coach/16.png", desc: "【職稱】資深營運處長\n【地點】新竹\n\n【企業介紹】科林研發(Lam Research)是全球前三大半導體設備製造商，總部位於美國矽谷。專門生產、設計、銷售半導體設備，掌握蝕刻和薄膜沉積製程的關鍵技術。提供先進技術與服務給各國半導體業者，驅動科技進步。", quote: "Be patient,focus on doing one thing well,and then you can confidently define your own path.", stats: { professional: 98, leadership: 95, passion: 85 } },
             { id: 17, name: "台灣橫渠產學聯盟", shortName: "橫渠產學聯盟", coach: "秘書長", logo: "https://tse1.explicit.bing.net/th/id/OIP.64IygBmFyWqnP-p9hRDbHAAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/17.png", desc: "【職稱】秘書長\n【地點】台南\n\n【企業介紹】橫渠產學聯盟致力於為台灣打造以能力為核心的大學產業創新人才培育生態圈。專注產業思維教育，提升學生軟實力，並連結專業夥伴，使所學能有所用。秉持「過河要搭橋，造林要育苗」的理念，共創產學價值。", quote: "選擇適合自己特質的跑道是事業成功的關鍵。", stats: { professional: 90, leadership: 98, passion: 95 } },
             { id: 18, name: "台灣職涯發展協會", shortName: "職涯發展協會", coach: "常務監事", logo: "./image/18.png", coachImage: "./coach/18.png", desc: "【職稱】常務監事\n【地點】台南\n\n【企業介紹】台灣職涯發展協會致力於推廣正確的職涯發展觀念，協助個人探索潛能、規劃職涯路徑。透過舉辦講座、工作坊與諮詢服務，培育專業職涯諮詢師，並連結產學資源，幫助青年與轉職者在職場馬拉松中找到穩健前行的步伐。", quote: "永遠別因為對失敗的恐懼，阻止自己對好奇的探索！因為人生是一系列的課題，必須實際地走過才能理解。", stats: { professional: 92, leadership: 96, passion: 98 } },
-            { id: 19, name: "叡揚資訊股份有限公司", shortName: "叡揚資訊", coach: "處長", logo: "https://www.taiwanexcellence.org/upload/firm/logo/22425662.jpg", coachImage: "./coach/19.png", desc: "【部門】企劃暨組織發展總處\n【地點】高雄\n\n【企業介紹】叡揚資訊為企業e化應用軟體開發與服務領導廠商。推出數位化辦公工具、雲端服務及AI智能對話服務等。擁有30多年的資安及智慧維運經驗，協助客戶推動數位轉型。秉持「品質與價值，承諾必達」的精神服務客戶。", quote: "「愛」我所擇，越努力越能自由的選擇！", stats: { professional: 93, leadership: 90, passion: 90 } },
+            
+            // 叡揚資訊 (影片 - 更新)
+            { id: 19, name: "叡揚資訊股份有限公司", shortName: "叡揚資訊", coach: "處長", logo: "https://www.taiwanexcellence.org/upload/firm/logo/22425662.jpg", coachImage: "./coach/19.png", 
+              videoUrl: "https://youtu.be/cfAr3hvRRqU", // 更新
+              desc: "【部門】企劃暨組織發展總處\n【地點】高雄\n\n【企業介紹】叡揚資訊為企業e化應用軟體開發與服務領導廠商。推出數位化辦公工具、雲端服務及AI智能對話服務等。擁有30多年的資安及智慧維運經驗，協助客戶推動數位轉型。秉持「品質與價值，承諾必達」的精神服務客戶。", quote: "「愛」我所擇，越努力越能自由的選擇！", stats: { professional: 93, leadership: 90, passion: 90 } },
+            
             { id: 20, name: "合聯電網科技有限公司", shortName: "合聯電網", coach: "總經理", logo: "https://www.taiwanarena.tech/upload/catalog_startups_list_pic/enL_catalog_startups_25E08_ZPJ2iZctNL.jpg", coachImage: "./coach/20.png", desc: "【職稱】總經理\n【地點】台北\n\n【企業介紹】合聯電網致力於電力系統分析、監測、保護與控制以及智慧電網應用之解決方案。以增進能源使用效率，並確保電力系統之可靠度與穩定性為目標。提供專業的電網技術服務，串起智慧能源的未來。", quote: "在危機中蘊藏著創造的機會。", stats: { professional: 95, leadership: 92, passion: 92 } },
             { id: 21, name: "台灣優衣庫有限公司(UNIQLO)", shortName: "UNIQLO", coach: "總監", logo: "https://upload.wikimedia.org/wikipedia/commons/9/92/UNIQLO_logo.svg", coachImage: "./coach/21.png", desc: "【職稱/部門】待定\n【地點】台南/台北\n\n【企業介紹】UNIQLO是日本迅銷有限公司(Fast Retailing)的核心品牌，堅持「LifeWear」的品牌理念。透過優質的服裝，改變人們的生活方式。致力於改變服裝、改變常識、改變世界，提供讓所有人生活更美好的日常服裝。", quote: "你的潛能無限，相信自己。每一天都是超越昨日的契機，邁向更好的自己。", stats: { professional: 90, leadership: 90, passion: 95 } },
             { id: 22, name: "臻鼎科技集團", shortName: "臻鼎科技", coach: "經理", logo: "https://tse1.mm.bing.net/th/id/OIP.yaT0IfoDROpXrbL9ELLh8QAAAA?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/22.png", desc: "【部門】人力資源部\n【地點】桃園/高雄\n\n【企業介紹】臻鼎科技集團是全球領先的印刷電路板(PCB)製造商。提供設計、研發、製造、銷售一站式購足的全方位解決方案。產品廣泛應用於電腦、通訊、消費性電子、車用電子等領域。秉持「發展科技，造福人類」的使命。", quote: "年輕人最重要的是三對：入對產業、選對公司、跟對主管。", stats: { professional: 94, leadership: 89, passion: 91 } },
@@ -785,12 +643,14 @@
 
         let currentBGM = normalBGM;
         let isMusicPlaying = false;
+        let isSfxOn = true; 
         let hasEncounteredBoss = false; 
 
         // 音效合成器
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         
         function playBeep(frequency = 440, type = 'square', duration = 0.1) {
+            if (!isSfxOn) return; 
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -803,20 +663,20 @@
             osc.stop(audioCtx.currentTime + duration);
         }
 
-        // BOSS 出場音效
         function playBossIntroSound() {
+            if (!isSfxOn) return;
             playBeep(100, 'sawtooth', 0.5);
             setTimeout(() => playBeep(80, 'sawtooth', 0.5), 400);
             setTimeout(() => playBeep(60, 'sawtooth', 1.0), 800);
         }
 
-        // 洗牌音效
         function playShuffleSound() {
+            if (!isSfxOn) return;
             playBeep(800, 'triangle', 0.05);
         }
 
-        // 抽卡音效
         function playGachaSound() {
+            if (!isSfxOn) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -833,10 +693,10 @@
         }
 
         function attachSoundEffects() {
-            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .gacha-folder, .boss-grid-item, .wooden-chest').forEach(el => {
+            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .gacha-folder, .boss-grid-item, .wooden-chest, .crystal-ball-btn, #image-modal').forEach(el => {
                 el.addEventListener('mouseenter', () => playBeep(800, 'sine', 0.05));
             });
-            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .wooden-chest').forEach(el => {
+            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .wooden-chest, .crystal-ball-btn').forEach(el => {
                 el.addEventListener('click', () => playBeep(440, 'square', 0.1));
             });
         }
@@ -851,6 +711,20 @@
                 currentBGM.play().catch(e => console.log("BGM play failed:", e));
                 isMusicPlaying = true;
                 bgmStatus.innerText = "BGM: ON";
+            }
+        }
+
+        function toggleSFX() {
+            isSfxOn = !isSfxOn;
+            const sfxStatus = document.getElementById('sfx-status');
+            const sfxIcon = document.getElementById('sfx-icon');
+            if (isSfxOn) {
+                sfxStatus.innerText = "SFX: ON";
+                sfxIcon.innerText = "🔊";
+                playBeep(1000, 'triangle', 0.1);
+            } else {
+                sfxStatus.innerText = "SFX: OFF";
+                sfxIcon.innerText = "🔇";
             }
         }
 
@@ -936,7 +810,6 @@
                 mainMap.style.opacity = 1;
             }, 50);
             
-            // 啟動 Boss 戰偵測器
             initBossObserver();
         }
 
@@ -995,6 +868,27 @@
             document.getElementById('company-id-display').innerText = String(company.id).padStart(3, '0');
             document.getElementById('detail-desc').innerText = company.desc;
             document.getElementById('detail-coach').innerText = company.coach;
+            
+            // 水晶球邏輯 (修正：判斷 ID=11 或有影片連結)
+            const ballContainer = document.getElementById('crystal-ball-container');
+            ballContainer.innerHTML = ''; 
+            
+            if (company.id === 11) {
+                // 裕隆專用 (圖片燈箱)
+                const ballBtn = document.createElement('button');
+                ballBtn.className = 'crystal-ball-btn';
+                ballBtn.title = "Click to view image";
+                ballBtn.onclick = () => openImageModal('./video/11.jpg');
+                ballContainer.appendChild(ballBtn);
+            } else if (company.videoUrl) {
+                // 其他 (YouTube / Shorts)
+                const ballBtn = document.createElement('button');
+                ballBtn.className = 'crystal-ball-btn';
+                ballBtn.title = "Click to watch video";
+                ballBtn.onclick = () => openYoutube(company.videoUrl);
+                ballContainer.appendChild(ballBtn);
+            }
+
             const stats = company.stats || { professional: 90, leadership: 90, passion: 90 };
             document.getElementById('val-professional').innerText = `${stats.professional}/100`;
             document.getElementById('val-leadership').innerText = `${stats.leadership}/100`;
@@ -1036,6 +930,85 @@
             animateBars(stats);
         }
 
+        // Helper: 自動轉換 YouTube 網址為 Embed 格式，支援 Shorts
+        function getYoutubeEmbedUrl(url) {
+            if (!url) return "";
+            
+            // 處理 Shorts
+            if (url.includes('youtube.com/shorts/')) {
+                const shortsId = url.split('shorts/')[1].split(/[?&]/)[0];
+                return { 
+                    url: `https://www.youtube.com/embed/${shortsId}?autoplay=1&loop=1&playlist=${shortsId}`, 
+                    type: 'shorts' 
+                };
+            }
+
+            // 處理一般影片
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+            const match = url.match(regExp);
+
+            if (match && match[2].length === 11) {
+                return { 
+                    url: `https://www.youtube.com/embed/${match[2]}?autoplay=1`,
+                    type: 'normal'
+                };
+            } else {
+                return { url: url, type: 'normal' };
+            }
+        }
+
+        // YouTube Modal Functions (修正版：自動轉換網址 + Shorts 支援 + 動畫)
+        function openYoutube(rawUrl) {
+            const modal = document.getElementById('youtube-modal');
+            const videoContainer = document.getElementById('video-container');
+            const iframe = document.getElementById('yt-iframe');
+            
+            // 使用轉換函式
+            const videoData = getYoutubeEmbedUrl(rawUrl);
+            iframe.src = videoData.url; 
+            
+            // 根據類型調整容器形狀
+            if (videoData.type === 'shorts') {
+                videoContainer.classList.add('shorts-mode');
+            } else {
+                videoContainer.classList.remove('shorts-mode');
+            }
+
+            // 加入開場動畫
+            videoContainer.classList.add('magic-open-anim');
+            
+            modal.classList.remove('hidden-screen');
+            playBeep(600, 'sine', 0.2); // 音效
+            
+            // 動畫結束後移除 class 以便下次重播
+            setTimeout(() => {
+                videoContainer.classList.remove('magic-open-anim');
+            }, 600);
+        }
+
+        function closeYoutube() {
+            const modal = document.getElementById('youtube-modal');
+            const iframe = document.getElementById('yt-iframe');
+            iframe.src = ""; 
+            modal.classList.add('hidden-screen');
+            playBeep(400, 'square', 0.1);
+        }
+
+        // Image Modal Functions (新增)
+        function openImageModal(url) {
+            const modal = document.getElementById('image-modal');
+            const img = document.getElementById('modal-img');
+            img.src = url;
+            modal.classList.remove('hidden-screen');
+            playBeep(600, 'sine', 0.2);
+        }
+
+        function closeImageModal() {
+            const modal = document.getElementById('image-modal');
+            modal.classList.add('hidden-screen');
+            playBeep(400, 'square', 0.1);
+        }
+
         let typeInterval;
         function typeWriter(text, elementId, speed = 50) {
             const element = document.getElementById(elementId);
@@ -1074,33 +1047,33 @@
         }
 
         // ==========================================
-        // === 3. BOSS 戰鬥系統實作 (更新為26題與新機制) ===
+        // === 3. BOSS 戰鬥系統 ===
         // ==========================================
 
-        let bossHP = 26; // 更新為26滴血
-        let clearedCount = 0; // 計算已消除的格子數
+        let bossHP = 26; 
+        let clearedCount = 0; 
         let currentTargetBlock = null;
 
         const questions = [
-            "1.在職場中新鮮人最常犯的「致命錯誤」是什麼？",
-            "2.我該如何在履歷上展現亮點來吸引人資注意？",
+            "1.職場新鮮人最常犯的「錯誤」是什麼？",
+            "2.我該如何展現履歷亮點來吸引人資注意？",
             "3.面試中問什麼樣的問題，最能展現我的積極態度？",
-            "4.身為職場新鮮人，我有資格談薪水嗎？",
-            "5.如果我想應徵與我科系無關的工作，我該如何說服企業我具備勝任這份工作的潛力？",
-            "6.再來一次",
+            "4.職場新鮮人，我有資格談薪水嗎？",
+            "5.如果我想應徵與本科系無關的工作，該如何說服企業我具備勝任這份工作的潛力？",
+            "6.再抽一次",
             "7.您認為現代職場中，最能讓新人脫穎而出的軟實力是什麼？",
-            "8.英文能在實際工作中，真的會頻繁用到嗎？還是這只是一個篩選門檻？",
+            "8.英文能在實際工作中，真的會頻繁用到嗎？還是這只是一個篩選門檻？ ",
             "9.沒有相關實習經驗，大學生還能用什麼方式補強競爭力？",
             "10.新鮮人最容易被忽略、但企業其實很在意的能力是什麼？",
             "11.主動請教主管或同事，怎麼做才不會被覺得很打擾？",
-            "12.對於容易焦慮、怕做錯事的新人，有什麼實際建議？",
+            "12.容易焦慮、怕做錯事的新人，有什麼實際建議？",
             "13.如果工作內容跟想像落差很大，會建議怎麼調適？",
             "14.職場上能交朋友嗎？還是公事公辦比較安全？",
             "15.如果不小心得罪同事或意見不合，當下該怎麼化解？",
             "16.第一份工作，該選制度完善的大公司還是具有挑戰的新創公司？",
-            "17.如何快速觀察並融入當地的「企業文化」或「潛規則」？",
-            "18.如果能回到剛畢業的那一年，您最想對當時準備踏入職場的自己說的一句話是什麼？",
-            "19.再來一次",
+            "17.如何快速觀察並融入當地的「企業文化」或「不成文規定」？",
+            "18.當遇到不會回答的面試題目時，您建議我應該如何應對？",
+            "19.再抽一次",
             "20.在試用期期間，企業最看重的是什麼？",
             "21.剛入職時常覺得自己什麼都不會，這種焦慮感該如何排解？",
             "22.在工作中犯了一個比較嚴重的錯誤，能做什麼來挽回？",
@@ -1110,13 +1083,18 @@
             "26.如何平衡工作表現與個人生活？"
         ];
 
-        // 亂碼字元庫
-        const scrambleChars = "!@#$%^&*()_+{}|:<>?ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const bossHints = [
+            "個人教練組", "聯華電子組", "臻鼎科技組", "科林研發組", "中國信託組", 
+            null, 
+            "Garmin組", "裕隆集團組", "燦揚企業組", "華泰電子組", "Uniqlo組", 
+            "叡揚資訊組", "永豐銀行組", "台灣職涯發展協會組", "合聯電網組", "鈦坦科技組", 
+            "資誠組", "卡內基訓練組", 
+            null, 
+            "雲報組", "美商英特格組", "信義房屋組", "翔英融創組", "橫渠產學聯盟組"
+        ];
 
-        // 初始化 Boss 戰監聽器
         function initBossObserver() {
             const target = document.getElementById('boss-stage'); 
-            
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -1126,7 +1104,6 @@
                     }
                 });
             }, { threshold: 0.1 }); 
-
             observer.observe(target);
             renderBossGrid();
         }
@@ -1157,7 +1134,6 @@
         function renderBossGrid() {
             const grid = document.getElementById('boss-grid');
             grid.innerHTML = '';
-            // 渲染 26 個問題格子
             for (let i = 0; i < 26; i++) {
                 const block = document.createElement('button');
                 block.className = 'boss-grid-item';
@@ -1166,11 +1142,7 @@
                 block.onclick = (e) => openQuestion(e.target);
                 grid.appendChild(block);
             }
-            
-            // 新增第 27 個元素：結算寶箱 (修正為真正的圖片)
-            // 使用像素風格的寶箱圖片 URL
             const chestUrl = "https://cdn-icons-png.flaticon.com/512/6121/6121517.png"; 
-
             const settlementBtn = document.createElement('button');
             settlementBtn.id = 'settlement-btn';
             settlementBtn.className = 'boss-grid-item settlement-chest-container';
@@ -1187,15 +1159,22 @@
             const modal = document.getElementById('question-modal');
             const qText = document.getElementById('q-text');
             const attackBtn = document.getElementById('attack-btn');
+            const hintBox = document.getElementById('mission-hint-box');
+            const hintText = document.getElementById('mission-hint-text');
             
             modal.classList.remove('hidden');
-            
             attackBtn.disabled = true;
             attackBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            hintBox.style.display = 'none';
 
             const targetIndex = parseInt(block.dataset.index);
             const finalQuestion = questions[targetIndex] || "ERROR: DATA NOT FOUND";
             
+            if (targetIndex < 24 && bossHints[targetIndex]) {
+                hintText.innerText = `~請${bossHints[targetIndex]}的組員到右方等候~`;
+                hintBox.style.display = 'block';
+            }
+
             qText.classList.add('shuffling');
             let shuffleCount = 0;
             const maxShuffles = 20; 
@@ -1217,7 +1196,6 @@
         function finalizeQuestion(text) {
             const qText = document.getElementById('q-text');
             const attackBtn = document.getElementById('attack-btn');
-            
             qText.innerText = text;
             qText.classList.remove('shuffling');
             playBeep(1200, 'sine', 0.2); 
@@ -1233,28 +1211,20 @@
         function triggerDamageEffect() {
             playBeep(150, 'sawtooth', 0.1); 
             setTimeout(() => playBeep(50, 'square', 0.4), 50); 
-
             globalBg.classList.add('damage-mode');
-            setTimeout(() => {
-                globalBg.classList.remove('damage-mode');
-            }, 200);
+            setTimeout(() => { globalBg.classList.remove('damage-mode'); }, 200);
         }
 
         function submitAttack() {
             triggerDamageEffect();
-            
-            // 攻擊邏輯
             if (bossHP > 0) bossHP--;
-            
             updateBossHPUI();
-            
             if (currentTargetBlock) {
                 currentTargetBlock.classList.add('cleared');
                 currentTargetBlock.innerText = "";
                 clearedCount++;
                 checkUnlockSettlement();
             }
-
             closeQuestionModal();
         }
 
@@ -1262,14 +1232,13 @@
             if (clearedCount >= 26) {
                 const chest = document.getElementById('settlement-btn');
                 chest.classList.add('unlocked');
-                playBeep(2000, 'triangle', 0.5); // 解鎖音效
+                playBeep(2000, 'triangle', 0.5); 
             }
         }
 
         function triggerFinalSettlement() {
             const chest = document.getElementById('settlement-btn');
             if (!chest.classList.contains('unlocked')) {
-                // 如果還沒解鎖
                 playBeep(100, 'sawtooth', 0.3);
                 return;
             }
@@ -1280,32 +1249,25 @@
             const hpBar = document.getElementById('boss-hp-bar');
             const hpText = document.getElementById('boss-hp-text');
             const percentage = (bossHP / 26) * 100;
-            
             hpBar.style.width = `${percentage}%`;
             hpText.innerText = `${bossHP}/26`;
-            
             bossStage.style.transform = "translate(5px, 5px)";
             setTimeout(() => bossStage.style.transform = "translate(0, 0)", 100);
         }
 
         function triggerVictory() {
-            const victoryScreen = document.getElementById('victory-screen');
-            victoryScreen.classList.remove('hidden');
-            
+            document.getElementById('victory-screen').classList.remove('hidden');
             switchBGM(normalBGM); 
-
             const notes = [523, 523, 523, 523, 415, 466, 523, 466, 523];
             let delay = 0;
             notes.forEach((note, index) => {
                 setTimeout(() => playBeep(note, 'square', 0.15), delay);
                 delay += (index === 3) ? 400 : 150;
             });
-
             const duration = 5 * 1000;
             const animationEnd = Date.now() + duration;
             const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
             const randomInRange = (min, max) => Math.random() * (max - min) + min;
-
             const interval = setInterval(function() {
                 const timeLeft = animationEnd - Date.now();
                 if (timeLeft <= 0) return clearInterval(interval);
@@ -1315,11 +1277,8 @@
             }, 250);
         }
 
-        // --- 有獎徵答邏輯 ---
         function openQuiz(boxId) {
             let question, options, correctAnswer;
-
-            // 根據木箱 ID 設定題目
             if (boxId === 1) {
                 question = "請問今年是第幾屆 CCP (職涯教練計畫)？";
                 options = { '13': '13屆', '14': '14屆', '15': '15屆', '16': '16屆' };
@@ -1329,42 +1288,21 @@
                 options = { 'A': '庭瑋', 'B': '芊瑜', 'C': '秉欣', 'D': '巧涵' };
                 correctAnswer = 'C'; 
             } else if (boxId === 3) {
-                question = "請問參與 CCP 第16屆的企業總共有幾間？";
-                options = { '23': '23間', '24': '24間', '25': '25間', '26': '26間' };
-                // 根據您的網頁資料 companies 陣列長度是 24
-                correctAnswer = '24';
+                question = "請問CCP(職涯教練計畫)由哪個單位主辦？";
+                options = { 'A': '活動組', 'B': '生涯組', 'C': '軍訓室', 'D': '住服組' };
+                correctAnswer = 'B';
             }
-
             Swal.fire({
-                title: '有獎徵答挑戰！',
-                text: question,
-                input: 'radio',
-                inputOptions: options,
-                confirmButtonText: '提交答案',
-                cancelButtonText: '放棄',
-                showCancelButton: true,
-                background: '#fff',
-                customClass: {
-                    popup: 'pixel-font'
-                }
+                title: '有獎徵答挑戰！', text: question, input: 'radio', inputOptions: options,
+                confirmButtonText: '提交答案', cancelButtonText: '放棄', showCancelButton: true,
+                background: '#fff', customClass: { popup: 'pixel-font' }
             }).then((result) => {
                 if (result.isConfirmed) {
                     if (result.value === correctAnswer) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: '答對了！',
-                            text: '獲得神祕獎勵！', // 移除 "(Boss 不會扣血)"
-                            confirmButtonText: '太棒了'
-                        });
-                        playBeep(880, 'triangle', 0.2);
-                        playBeep(1760, 'triangle', 0.4);
+                        Swal.fire({ icon: 'success', title: '答對了！', text: '獲得神祕獎勵！', confirmButtonText: '太棒了' });
+                        playBeep(880, 'triangle', 0.2); playBeep(1760, 'triangle', 0.4);
                     } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: '答錯囉...',
-                            text: '再試一次吧！',
-                            confirmButtonText: '好'
-                        });
+                        Swal.fire({ icon: 'error', title: '答錯囉...', text: '再試一次吧！', confirmButtonText: '好' });
                         playBeep(150, 'sawtooth', 0.4);
                     }
                 }
