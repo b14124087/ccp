@@ -32,7 +32,7 @@
 
         /* 通用設定 */
         img, video { max-width: 100%; height: auto; }
-        a, button, .company-grid-item, .close-btn, .gacha-folder, .pixel-btn, .boss-grid-item, .wooden-chest, .crystal-ball-btn, #image-modal {
+        a, button, .company-grid-item, .close-btn, .gacha-folder, .pixel-btn, .boss-grid-item, .wooden-chest, .crystal-ball-btn, .newspaper-btn, #image-modal {
             cursor: url('https://cur.cursors-4u.net/cursors/cur-10/cur964.cur'), pointer; 
         }
 
@@ -242,6 +242,16 @@
             image-rendering: pixelated;
         }
         .crystal-ball-btn:hover { transform: scale(1.1) rotate(5deg); filter: drop-shadow(0 0 8px #4fd1c5); }
+        
+        /* 報紙按鈕特效 (翔英融創專用) */
+        .newspaper-btn {
+            display: inline-block; width: 56px; height: 56px; margin-left: 10px; vertical-align: middle;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='10' y='8' width='44' height='48' fill='%23fff' stroke='%23000' stroke-width='4'/%3E%3Crect x='16' y='14' width='32' height='4' fill='%23000'/%3E%3Crect x='16' y='24' width='14' height='14' fill='%23ccc' stroke='%23000' stroke-width='2'/%3E%3Crect x='34' y='24' width='14' height='2' fill='%23000'/%3E%3Crect x='34' y='30' width='14' height='2' fill='%23000'/%3E%3Crect x='34' y='36' width='14' height='2' fill='%23000'/%3E%3Crect x='16' y='44' width='32' height='2' fill='%23000'/%3E%3Crect x='16' y='50' width='20' height='2' fill='%23000'/%3E%3C/svg%3E") no-repeat center/contain;
+            transition: transform 0.2s; filter: drop-shadow(2px 2px 0px #000);
+            image-rendering: pixelated;
+        }
+        .newspaper-btn:hover { transform: scale(1.1) rotate(-5deg); filter: drop-shadow(0 0 8px #fff); }
+
 
         /* Youtube Modal (修正版) */
         #youtube-modal {
@@ -304,9 +314,64 @@
         .custom-scroll::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
         
-        .swal2-popup { font-family: 'DotGothic16', sans-serif !important; border: 4px solid black !important; border-radius: 0 !important; box-shadow: 8px 8px 0 rgba(0,0,0,0.5) !important; }
+        .swal2-popup { font-family: 'DotGothic16', sans-serif !important; border: 4px solid black !important; border-radius: 0 !important; box-shadow: 8px 8px 0 rgba(0,0,0,0.5) !important; width: auto !important; max-width: 90% !important;}
         .swal2-title { font-family: 'DotGothic16', sans-serif !important; }
         .swal2-confirm, .swal2-deny, .swal2-cancel { border: 2px solid black !important; border-radius: 0 !important; box-shadow: 4px 4px 0 rgba(0,0,0,0.2) !important; }
+
+        /* SweetAlert2 選擇題客製化樣式 - 橫向排列 & 加大 */
+        .swal2-radio {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+            gap: 15px !important;
+            margin-top: 15px !important;
+        }
+        
+        .swal2-radio label {
+            background: #f0f0f0;
+            border: 4px solid #000;
+            padding: 12px 24px !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            cursor: pointer;
+            transition: all 0.1s;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+            min-width: 120px;
+        }
+
+        .swal2-radio label:hover {
+            transform: translate(-2px, -2px);
+            background: #ffe066;
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+        }
+
+        .swal2-radio label:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        /* 隱藏預設的 radio 圓圈，改成純按鈕風格 */
+        .swal2-radio input {
+            appearance: none;
+            -webkit-appearance: none;
+            position: absolute;
+            opacity: 0;
+        }
+        
+        /* 選中時的樣式 */
+        .swal2-radio input:checked + span::before {
+             content: "👉 ";
+        }
+        .swal2-radio input:checked + span {
+            font-weight: bold;
+            color: #d32f2f;
+        }
+
 
     </style>
 </head>
@@ -576,7 +641,12 @@
             { id: 4, name: "統一企業股份有限公司", shortName: "統一企業", coach: "經理部主管", logo: "https://upload.wikimedia.org/wikipedia/zh/thumb/a/a2/Uni-President_Taiwan_logo.svg/250px-Uni-President_Taiwan_logo.svg.png", coachImage: "./coach/04.png", desc: "【部門】總經理室\n【地點】台南\n\n【企業介紹】統一企業自1967年創立於臺南永康，堅持「三好一公道」的經營理念（品質好、信用好、服務好、價格公道），已發展成為遍佈全島、跨足大陸、邁向全球的綜合性健康服務民生產業集團。致力於提升消費者的生活品質。", quote: "唯有熱愛自己的工作，才能做到「身累心不累」的境界。", stats: { professional: 95, leadership: 88, passion: 96 } },
             { id: 5, name: "璨揚企業股份有限公司", shortName: "璨揚企業", coach: "經理", logo: "./image/05.jpg", coachImage: "./coach/05.png", desc: "【部門】人力資源部\n【地點】台南\n\n【企業介紹】璨揚企業創立於1981年，位於台南市科技工業區，為台灣最大的卡車拖車車燈製造廠。三十年來不斷創新與研發，產品行銷遍及世界各地。秉持「力行品質至上、超越顧客期望」之品質政策，並善盡社會公民責任。", quote: "專業使你稱職，好奇使你成長，熱情使你傑出。", stats: { professional: 88, leadership: 85, passion: 98 } },
             { id: 6, name: "雲報股份有限公司", shortName: "雲報", coach: "發行人兼總編輯", logo: "./image/06.png", coachImage: "./coach/06.png", desc: "【職稱】發行人兼總編輯\n【地點】台北\n\n【企業介紹】《雲報(CloudExpress)》定位為國會與產業之間的互動溝通平台，協助產業界打造更完備的法規環境。發行對象鎖定決策菁英，致力串連政策制定與產業發展，打造能快速反映趨勢、滾動修正觀點的國家政經產業智識引擎。", quote: "我們的話，「是」就說「是」，「不是」就說「不是」。", stats: { professional: 94, leadership: 96, passion: 90 } },
-            { id: 7, name: "翔英融創股份有限公司", shortName: "翔英融創", coach: "副總經理", logo: "https://nadaholdings.com/wp-content/uploads/2022/05/NADA-HOLDINGS_favicon-150x150.png", coachImage: "./coach/07.png", desc: "【職稱】副總經理\n【地點】台北\n\n【企業介紹】翔英融創由智寶國際與文策院合資成立，致力於推動台灣原創IP踏上國際舞台。透過與日本製作、發行公司合作，引進產業技術與人才交流，期許作為台、日動畫產業對接的專業橋樑，扶植台灣IP成功產製動畫並躍上國際。", quote: "挑錯總是比較容易，而培養學生改革社會的勇氣，卻是不容易。", stats: { professional: 90, leadership: 92, passion: 95 } },
+            
+            // 翔英融創 - ID 7 (更新：加入影片連結)
+            { id: 7, name: "翔英融創股份有限公司", shortName: "翔英融創", coach: "副總經理", logo: "https://nadaholdings.com/wp-content/uploads/2022/05/NADA-HOLDINGS_favicon-150x150.png", coachImage: "./coach/07.png", 
+              videoUrl: "https://youtu.be/dummyVideoLink", // TODO: 請在此處填入正確的 YouTube 影片網址
+              desc: "【職稱】副總經理\n【地點】台北\n\n【企業介紹】翔英融創由智寶國際與文策院合資成立，致力於推動台灣原創IP踏上國際舞台。透過與日本製作、發行公司合作，引進產業技術與人才交流，期許作為台、日動畫產業對接的專業橋樑，扶植台灣IP成功產製動畫並躍上國際。", quote: "挑錯總是比較容易，而培養學生改革社會的勇氣，卻是不容易。", stats: { professional: 90, leadership: 92, passion: 95 } },
+            
             { id: 8, name: "信義房屋股份有限公司", shortName: "信義房屋", coach: "協理", logo: "https://tse4.mm.bing.net/th/id/OIP.19-3ZoZrnkCdXE4Y-8p41gHaD0?rs=1&pid=ImgDetMain&o=7&rm=3", coachImage: "./coach/08.png", desc: "【部門】仲介營運三處\n【地點】台南\n\n【企業介紹】信義房屋成立於1981年，堅持「信義立業，止於至善」的經營理念。首創「不動產說明書」，推動房屋交易透明化。致力於成為居住生活服務第一品牌，並積極投入ESG與社區營造，實踐「先義後利」的企業精神。", quote: "別相信運氣，要相信做了什麼努力產出好運氣。", stats: { professional: 91, leadership: 94, passion: 97 } },
             { id: 9, name: "資誠聯合會計師事務所", shortName: "資誠 PwC", coach: "副總/執業會計師", logo: "https://upload.wikimedia.org/wikipedia/commons/0/05/PricewaterhouseCoopers_Logo.svg", coachImage: "./coach/09.png", desc: "【部門】審計\n【地點】台南/台北\n\n【企業介紹】資誠(PwC Taiwan)係由朱國璋及陳振銑會計師於1970年創立，為PwC全球聯盟成員。提供審計、稅務、投資理財、價值管理、人力資源等整合性專業服務。運用全球資源，協助客戶精準掌握經濟產業趨勢，提升企業價值。", quote: "持續抱持更多好奇心，豐富生活體驗，樂於分享，打磨自身品牌和價值，創造更多選擇優勢。", stats: { professional: 99, leadership: 85, passion: 88 } },
             { id: 10, name: "華泰電子股份有限公司", shortName: "華泰電子 OSE", coach: "經理", logo: "https://sorting-house.com.tw/wp-content/uploads/2016/09/005-1.jpg", coachImage: "./coach/10.png", desc: "【部門】人力資源\n【地點】高雄\n\n【企業介紹】華泰電子專注於記憶體產品，為台灣第一家完全台資的IC封裝代工廠，深獲肯定。自1971年成立以來，透過製程創新與核心優勢，提供積體電路封裝與測試製造服務(IC Packaging & Testing)及專業電子代工製造服務(EMS)。", quote: "If you do what you’ve always done, you’ll get what you’ve always got.", stats: { professional: 89, leadership: 88, passion: 90 } },
@@ -605,7 +675,7 @@
             { id: 18, name: "台灣職涯發展協會", shortName: "職涯發展協會", coach: "常務監事", logo: "./image/18.png", coachImage: "./coach/18.png", desc: "【職稱】常務監事\n【地點】台南\n\n【企業介紹】台灣職涯發展協會致力於推廣正確的職涯發展觀念，協助個人探索潛能、規劃職涯路徑。透過舉辦講座、工作坊與諮詢服務，培育專業職涯諮詢師，並連結產學資源，幫助青年與轉職者在職場馬拉松中找到穩健前行的步伐。", quote: "永遠別因為對失敗的恐懼，阻止自己對好奇的探索！因為人生是一系列的課題，必須實際地走過才能理解。", stats: { professional: 92, leadership: 96, passion: 98 } },
             
             // 叡揚資訊 (影片 - 更新)
-            { id: 19, name: "叡揚資訊股份有限公司", shortName: "叡揚資訊", coach: "處長", logo: "./image/19.png", coachImage: "./coach/19.png", 
+            { id: 19, name: "叡揚資訊股份有限公司", shortName: "叡揚資訊", coach: "處長", logo: "https://www.taiwanexcellence.org/upload/firm/logo/22425662.jpg", coachImage: "./coach/19.png", 
               videoUrl: "https://youtu.be/cfAr3hvRRqU", // 更新
               desc: "【部門】企劃暨組織發展總處\n【地點】高雄\n\n【企業介紹】叡揚資訊為企業e化應用軟體開發與服務領導廠商。推出數位化辦公工具、雲端服務及AI智能對話服務等。擁有30多年的資安及智慧維運經驗，協助客戶推動數位轉型。秉持「品質與價值，承諾必達」的精神服務客戶。", quote: "「愛」我所擇，越努力越能自由的選擇！", stats: { professional: 93, leadership: 90, passion: 90 } },
             
@@ -693,10 +763,10 @@
         }
 
         function attachSoundEffects() {
-            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .gacha-folder, .boss-grid-item, .wooden-chest, .crystal-ball-btn, #image-modal').forEach(el => {
+            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .gacha-folder, .boss-grid-item, .wooden-chest, .crystal-ball-btn, .newspaper-btn, #image-modal').forEach(el => {
                 el.addEventListener('mouseenter', () => playBeep(800, 'sine', 0.05));
             });
-            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .wooden-chest, .crystal-ball-btn').forEach(el => {
+            document.querySelectorAll('.company-grid-item, .pixel-btn, button, .trigger-sound, .close-btn, .wooden-chest, .crystal-ball-btn, .newspaper-btn').forEach(el => {
                 el.addEventListener('click', () => playBeep(440, 'square', 0.1));
             });
         }
@@ -880,6 +950,15 @@
                 ballBtn.title = "Click to view image";
                 ballBtn.onclick = () => openImageModal('./video/11.jpg');
                 ballContainer.appendChild(ballBtn);
+            } else if (company.id === 7) {
+                // 翔英融創專用 (像素報紙)
+                const newsBtn = document.createElement('button');
+                newsBtn.className = 'newspaper-btn';
+                newsBtn.title = "Click to read news (Watch Video)";
+                // 如果該公司有 videoUrl 則使用，否則使用預設
+                const targetUrl = company.videoUrl || "";
+                newsBtn.onclick = () => openYoutube(targetUrl);
+                ballContainer.appendChild(newsBtn);
             } else if (company.videoUrl) {
                 // 其他 (YouTube / Shorts)
                 const ballBtn = document.createElement('button');
