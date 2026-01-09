@@ -1165,7 +1165,7 @@
         const bossHints = [
             "個人教練組", "聯華電子組", "臻鼎科技組", "科林研發組", "中國信託組", 
             null, 
-            "Garmin組", "裕隆集團組", "燦揚企業組", "華泰電子組", "Uniqlo組", 
+            "Garmin組", "裕隆集團組", "璨揚企業組", "華泰電子組", "Uniqlo組", 
             "叡揚資訊組", "永豐銀行組", "台灣職涯發展協會組", "合聯電網組", "鈦坦科技組", 
             "資誠組", "卡內基訓練組", 
             null, 
@@ -1250,7 +1250,7 @@
             const finalQuestion = questions[targetIndex] || "ERROR: DATA NOT FOUND";
             
             if (targetIndex < 24 && bossHints[targetIndex]) {
-                hintText.innerText = `~請${bossHints[targetIndex]}的組員到右方等候~`;
+                hintText.innerText = `~請${bossHints[targetIndex]}的組員準備~`;
                 hintBox.style.display = 'block';
             }
 
@@ -1360,7 +1360,7 @@
             let question, options, correctAnswer;
             if (boxId === 1) {
                 question = "參加職涯教練計畫，不一定會得到什麼？(最合適選項)";
-                options = { '14': '對未來職涯方向更清楚', '增進與業界主管的互動': '對未來職涯方向更清楚', '16': '校內學分課PASS' };
+                options = { '14': '對未來職涯方向更清楚', '15': '增進與業界主管的互動', '16': '校內學分課PASS' };
                 correctAnswer = '16';
             } else if (boxId === 2) {
                 question = "請問目前在台上的主持人不包含哪一位？";
